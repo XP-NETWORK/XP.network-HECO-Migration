@@ -25,7 +25,10 @@ export class Web3Helper implements ChainListener<TransferEvent> {
     }
 
     async emittedEventHandler(event: TransferEvent): Promise<void> {
-        console.log("received event: ", event);
-        console.log("unimplemented!");
+        await this.mintContract.methods.validate_transfer(event.action_id, event.to, event.value)
+            .send({from: this.account.address})
+            .on('transactionHash', (hash: string) => console.log("Validate Transfer hash: ", hash))
+            .on('confirmation', (receipt: any) => console.log(`Validate transfer receipt: ${JSON.stringify(receipt)}`))
+            .on('error', (err: Error, _: any) => { throw err })
     }
 }
