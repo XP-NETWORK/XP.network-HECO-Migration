@@ -1,17 +1,61 @@
-const { expect } = require('chai');
+const chai = require('chai');
+const { ethers } = require("hardhat")
+const { solidity } = require("ethereum-waffle");
 
-const { BN } = require('@openzeppelin/test-helpers');
+chai.use(solidity);
+const { expect } = chai;
 
-const Minter = artifacts.require('Minter')
+const TRANSFER_AMT = 100000000000000;
+const ALICE_POLKA = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
 
-contract('Minter', function([owner, other]) {
-	beforeEach(async function() {
-		this.minter = await Minter.new([owner], 1, {from: owner});
+describe('Minter', () => {
+	let owner, addr1, addr2, addr3;
+	let xpnet;
+	let minter;
+
+	beforeEach(async () => {
+		[owner, addr1, addr2, addr3] = await ethers.getSigners();
+
+		const XPNet = await ethers.getContractFactory("XPNet");
+		xpnet = await XPNet.deploy();
+
+		const Minter = await ethers.getContractFactory("Minter");
+		minter = await Minter.deploy(
+			[owner.address, addr1.address, addr2.address],
+			2,
+			xpnet.address
+		);
+
+		await xpnet.transferOwnership(minter.address);
 	});
 
-	it('validate a simple transaction', async function() {
-		await this.minter.validate_transfer(new BN('1'), other, new BN('1000000'));
+	it('validate a simple transaction', async () => {
+		await minter.connect(owner)
+			.validate_transfer(1, addr3.address, TRANSFER_AMT);
 
-		// TODO: Check balance
+		await minter.connect(addr1)
+			.validate_transfer(1, addr3.address, TRANSFER_AMT);
+
+		const bal = await xpnet.balanceOf(addr3.address);
+		expect(bal).to.equal(TRANSFER_AMT);
+
+		await minter.connect(addr2)
+			.validate_transfer(1, addr3.address, TRANSFER_AMT);
+	});
+
+	it('unfreeze test', async () => {
+		await minter.connect(addr1)
+			.validate_transfer(3434343, addr3.address, TRANSFER_AMT);
+	
+		await minter.connect(addr2)
+			.validate_transfer(3434343, addr3.address, TRANSFER_AMT);
+
+		await expect(minter.connect(addr3)
+			.unfreeze(ALICE_POLKA, TRANSFER_AMT))
+			.to.emit(minter, 'Unfreeze')
+			.withArgs(0, ALICE_POLKA, TRANSFER_AMT)
+
+		const bal = await xpnet.balanceOf(addr3.address);
+		expect(bal).to.equal(0);
 	})
 })
