@@ -39,5 +39,6 @@ export class Web3Helper implements ChainEmitter<SolUnfreezeEvent, void, Unfreeze
 
     async emittedEventHandler(event: TransferEvent): Promise<void> {
 		await this.mintContract.validate_transfer(event.action_id.toString(), event.to, event.value.toString());
+		console.log(`web3 action_id: ${event.action_id}, executed`);
     }
 }
