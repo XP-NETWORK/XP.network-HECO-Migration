@@ -11,5 +11,5 @@ Unfreezing token is broken right now
 ## TODO:
 
 - run tests on heco's testnet
-- fix implementation of Unfreeze ChainEmitter
+- Investigate why event catching with hardhat node isn't working (https://github.com/ethers-io/ethers.js/discussions/1691)
 
