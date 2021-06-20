@@ -103,9 +103,9 @@ contract Minter {
 	}
 
 	// Transfer ETH to to Polka
-	function freeze(string memory to, uint256 value) public payable {
+	function freeze(string memory to) public payable {
 		require(msg.value > 0, "value must be > 0!");
-		emit Transfer(action_cnt, to, value);
+		emit Transfer(action_cnt, to, msg.value);
 		action_cnt += 1;
 	}
 }
