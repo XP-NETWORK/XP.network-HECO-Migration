@@ -1,0 +1,3 @@
+[submodule "freezer"]
+	path = freezer
+	url = https://github.com/xp-network/polkadot-freezer
