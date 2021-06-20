@@ -3,13 +3,19 @@ import { Contract, providers, Wallet } from "ethers";
 import { Interface } from "ethers/lib/utils";
 import { ChainEmitter, ChainListener, TransferEvent, UnfreezeEvent } from "validator";
 
-type SolUnfreezeEvent = {
+enum SolEventT {
+	Unfreeze,
+	Transfer
+}
+
+type SolEvent = {
+	readonly type: SolEventT;
 	readonly action_id: BigNumber;
 	readonly to: string;
 	readonly value: BigNumber;
 };
 
-export class Web3Helper implements ChainEmitter<SolUnfreezeEvent, void, UnfreezeEvent>, ChainListener<TransferEvent> {
+export class Web3Helper implements ChainEmitter<SolEvent, void, TransferEvent | UnfreezeEvent>, ChainListener<TransferEvent | UnfreezeEvent> {
     readonly mintContract: Contract;
 
     private constructor(mintContract: Contract) {
@@ -25,20 +31,41 @@ export class Web3Helper implements ChainEmitter<SolUnfreezeEvent, void, Unfreeze
         return new Web3Helper(mint);
     }
 
-	async eventIter(cb: ((event: SolUnfreezeEvent) => Promise<void>)): Promise<void> {
+	async eventIter(cb: ((event: SolEvent) => Promise<void>)): Promise<void> {
 		this.mintContract.on(this.mintContract.filters.Unfreeze(), async (action_id: BigNumber, to: string, value: BigNumber) => {
-			const ev = { action_id, to, value };
-			console.log("ev", JSON.stringify(ev));
-			await cb(ev)
+			const ev = { type: SolEventT.Unfreeze, action_id, to, value };
+			await cb(ev);
 		});
+		this.mintContract.on(this.mintContract.filters.Transfer(), async (action_id: BigNumber, to: string, value: BigNumber) => {
+			const ev = { type: SolEventT.Transfer, action_id, to, value };
+			await cb(ev);
+		})
 	}
 
-	async eventHandler(ev: SolUnfreezeEvent): Promise<UnfreezeEvent | undefined> {
-		return new UnfreezeEvent(ev.action_id, ev.to, ev.value);
+	async eventHandler(ev: SolEvent): Promise<TransferEvent | UnfreezeEvent | undefined> {
+		switch (ev.type) {
+			case SolEventT.Unfreeze:
+				return new UnfreezeEvent(ev.action_id, ev.to, ev.value);
+			case SolEventT.Transfer:
+				return new TransferEvent(ev.action_id, ev.to, ev.value);
+		}
 	}
 
-    async emittedEventHandler(event: TransferEvent): Promise<void> {
-		await this.mintContract.validate_transfer(event.action_id.toString(), event.to, event.value.toString());
-		console.log(`web3 action_id: ${event.action_id}, executed`);
+    async emittedEventHandler(event: TransferEvent | UnfreezeEvent): Promise<void> {
+		let kind: string;
+		let action: string;
+		if (event instanceof TransferEvent) {
+			action = event.action_id.toString();
+            await this.mintContract.validate_transfer(action, event.to, event.value.toString());
+			kind = "transfer"
+        } else if (event instanceof UnfreezeEvent) {
+			action = event.id.toString();
+            await this.mintContract.validate_unfreeze(action, event.to, event.value.toString());
+			kind = "unfreeze"
+        } else {
+            throw Error("Unsupported event!");
+        }
+	
+		console.log(`web3 ${kind} action_id: ${action}, executed`);
     }
 }

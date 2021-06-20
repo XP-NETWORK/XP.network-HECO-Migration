@@ -1,7 +1,7 @@
 {
   "metadataVersion": "0.1.0",
   "source": {
-    "hash": "0xc1be130540c0c1ccba88937ba34a2751aed930256fb3723df1b13b964c09858e",
+    "hash": "0x47d7219d8934df25cf913fded27dd5f5910a29143747b43f3c302443eff51613",
     "language": "ink! 3.0.0-rc3",
     "compiler": "rustc 1.54.0-nightly"
   },
@@ -15,12 +15,22 @@
   "spec": {
     "constructors": [
       {
-        "args": [],
+        "args": [
+          {
+            "name": "erc20_addr",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 4
+            }
+          }
+        ],
         "docs": [],
         "name": [
-          "default"
+          "new"
         ],
-        "selector": "0xed4b9d1b"
+        "selector": "0x9bae9d5e"
       }
     ],
     "docs": [],
@@ -110,12 +120,51 @@
               "displayName": [
                 "Vec"
               ],
-              "type": 18
+              "type": 19
             }
           }
         ],
         "docs": [],
         "name": "ScCall"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": false,
+            "name": "action_id",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 15
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "name": "to",
+            "type": {
+              "displayName": [
+                "String"
+              ],
+              "type": 11
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "name": "value",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 15
+            }
+          }
+        ],
+        "docs": [],
+        "name": "UnfreezeWrap"
       }
     ],
     "messages": [
@@ -124,10 +173,8 @@
           {
             "name": "to",
             "type": {
-              "displayName": [
-                "String"
-              ],
-              "type": 11
+              "displayName": [],
+              "type": 18
             }
           }
         ],
@@ -146,44 +193,32 @@
       {
         "args": [
           {
-            "name": "target_contract",
+            "name": "to",
             "type": {
-              "displayName": [
-                "String"
-              ],
-              "type": 11
-            }
-          },
-          {
-            "name": "endpoint",
-            "type": {
-              "displayName": [
-                "String"
-              ],
-              "type": 11
-            }
-          },
-          {
-            "name": "args",
-            "type": {
-              "displayName": [
-                "Vec"
-              ],
+              "displayName": [],
               "type": 18
+            }
+          },
+          {
+            "name": "value",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 15
             }
           }
         ],
         "docs": [
-          " Emit an SCCall event",
-          " TODO: Charge some token amount for this"
+          " Burn erc20 token & emit event"
         ],
         "mutates": true,
         "name": [
-          "send_sc_call"
+          "withdraw_wrapper"
         ],
         "payable": false,
         "returnType": null,
-        "selector": "0x10062b2a"
+        "selector": "0x8cc357e0"
       },
       {
         "args": [
@@ -283,9 +318,49 @@
         "selector": "0x845f21ef"
       },
       {
+        "args": [
+          {
+            "name": "action_id",
+            "type": {
+              "displayName": [
+                "String"
+              ],
+              "type": 11
+            }
+          },
+          {
+            "name": "to",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 4
+            }
+          },
+          {
+            "name": "value",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 15
+            }
+          }
+        ],
+        "docs": [],
+        "mutates": true,
+        "name": [
+          "send_wrapper_verify"
+        ],
+        "payable": false,
+        "returnType": null,
+        "selector": "0x5ea1a574"
+      },
+      {
         "args": [],
         "docs": [
           " Subscribe to events & become a validator",
+          " Placeholder for now",
           " TODO: Proper implementation"
         ],
         "mutates": true,
@@ -488,6 +563,15 @@
             }
           },
           "name": "last_action"
+        },
+        {
+          "layout": {
+            "cell": {
+              "key": "0x0500000002000000000000000000000000000000000000000000000000000000",
+              "ty": 4
+            }
+          },
+          "name": "wrapper"
         }
       ]
     }
@@ -781,6 +865,21 @@
                 }
               ],
               "name": "RpcCall"
+            },
+            {
+              "fields": [
+                {
+                  "name": "to",
+                  "type": 4,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "value",
+                  "type": 15,
+                  "typeName": "Balance"
+                }
+              ],
+              "name": "SendWrapped"
             }
           ]
         }
@@ -832,8 +931,16 @@
     },
     {
       "def": {
+        "array": {
+          "len": 20,
+          "type": 6
+        }
+      }
+    },
+    {
+      "def": {
         "sequence": {
-          "type": 19
+          "type": 20
         }
       }
     },

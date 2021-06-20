@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import {emitEvents, PolkadotHelper} from "validator";
 import config from './config';
 import * as freezer_abi from './freezer_abi.json';
@@ -24,11 +23,6 @@ const main = async () => {
 
 	emitEvents(polka, w3);
 	emitEvents(w3, polka);
-
-	w3.mintContract.on('Unfreeze', async (action_id: ethers.BigNumber, to: string, value: ethers.BigNumber ) => {
-		const ev = { action_id, to, value };
-		console.log("ev", JSON.stringify(ev));
-	});
 };
 
 main();
