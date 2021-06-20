@@ -1,8 +1,9 @@
-import {PolkadotHelper, emitEvents} from "validator";
-import {Web3Helper} from "./handlers/web3";
-import * as freezer_abi from './freezer_abi.json';
-import { abi as minter_abi  }  from './minter.json';
+import { ethers } from "ethers";
+import {emitEvents, PolkadotHelper} from "validator";
 import config from './config';
+import * as freezer_abi from './freezer_abi.json';
+import {Web3Helper} from "./handlers/web3";
+import { abi as minter_abi  }  from './minter.json';
 
 const main = async () => {
 	const polka = await PolkadotHelper.new(
@@ -11,11 +12,11 @@ const main = async () => {
 		config.xp_freezer
 	);
 
-	const w3 = Web3Helper.new(
+	const w3 = await Web3Helper.new(
 		config.w3_node,
 		config.w3_pk,
 		config.w3_minter,
-		//@ts-expect-error
+		//@ts-expect-error ABI
 		minter_abi
 	)
 
@@ -23,6 +24,11 @@ const main = async () => {
 
 	emitEvents(polka, w3);
 	emitEvents(w3, polka);
+
+	w3.mintContract.on('Unfreeze', async (action_id: ethers.BigNumber, to: string, value: ethers.BigNumber ) => {
+		const ev = { action_id, to, value };
+		console.log("ev", JSON.stringify(ev));
+	});
 };
 
 main();
