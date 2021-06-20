@@ -51,7 +51,7 @@ describe('Minter', () => {
 			.validate_transfer(3434343, addr3.address, TRANSFER_AMT);
 
 		await expect(minter.connect(addr3)
-			.unfreeze(ALICE_POLKA, TRANSFER_AMT))
+			.withdraw(ALICE_POLKA, TRANSFER_AMT))
 			.to.emit(minter, 'Unfreeze')
 			.withArgs(0, ALICE_POLKA, TRANSFER_AMT)
 
