@@ -1,3 +1,9 @@
 [submodule "freezer"]
 	path = freezer
 	url = https://github.com/xp-network/polkadot-freezer
+[submodule "testsuite"]
+	path = testsuite
+	url = https://github.com/xp-network/migration-testsuite
+[submodule "wrap_token"]
+	path = wrap_token
+	url = https://github.com/xp-network/polkadot-wraptoken
