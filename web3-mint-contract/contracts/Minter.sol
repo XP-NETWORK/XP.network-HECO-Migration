@@ -67,8 +67,9 @@ contract Minter {
 
 		action_validators[action_id][msg.sender] = 2;
 
+		ValidationRes res = ValidationRes.Noop;
 		if (actions[action_id].validator_cnt == threshold) {
-			return ValidationRes.Execute;
+			res = ValidationRes.Execute;
 		}
 
 		if (actions[action_id].validator_cnt == validator_cnt) {
@@ -76,7 +77,7 @@ contract Minter {
 			// TODO: Should we clear action_validators?
 		}
 
-		return ValidationRes.Noop;
+		return res;
 	}
 
 	// Transfer XPNET
