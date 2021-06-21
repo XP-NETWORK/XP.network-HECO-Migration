@@ -56,6 +56,7 @@ export class Web3Helper implements ChainEmitter<SolEvent, void, TransferEvent | 
 		let action: string;
 		if (event instanceof TransferEvent) {
 			action = event.action_id.toString();
+			console.log(`target: ${event.to}, value: ${event.value}`)
             await this.mintContract.validate_transfer(action, event.to, event.value.toString());
 			kind = "transfer"
         } else if (event instanceof UnfreezeEvent) {
