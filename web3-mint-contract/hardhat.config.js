@@ -4,6 +4,8 @@
 require('@nomiclabs/hardhat-ethers');
 require("@nomiclabs/hardhat-waffle");
 
+require('dotenv').config();
+
 module.exports = {
   solidity: "0.8.4",
   networks: {
@@ -12,6 +14,10 @@ module.exports = {
         auto: false,
         interval: 4000
       }
-    }
+    },
+	heco_testnet: {
+	  url: "https://http-testnet.hecochain.com",
+	  accounts: [process.env.SIGNER]
+	}
   }
 };
