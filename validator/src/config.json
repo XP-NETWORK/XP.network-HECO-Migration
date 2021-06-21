@@ -1,9 +1,0 @@
-{
-    "xnode": "ws://localhost:9944",
-    "w3_node": "wss://ws-testnet.hecochain.com",
-	"w3_pk":
-        "0xb43ddd27cfb99201cb94c11cf5982c9c04582dfd2b64f656cc01bbf96eec0cf6",
-    "w3_minter":
-        "0xd343A401f26cCBf1AFc6b502bCFa6dbC5ACB78EC",
-    "xp_freezer": "5EMEcr9373XXyuUMR66U7BFBg5dT6DfRwjw2XdphHwt7aZ1V"
-}
