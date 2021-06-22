@@ -32,14 +32,14 @@ export class Web3Helper implements ChainEmitter<SolEvent, void, TransferEvent | 
     }
 
 	async eventIter(cb: ((event: SolEvent) => Promise<void>)): Promise<void> {
-		this.mintContract.on(this.mintContract.filters.Unfreeze(), async (action_id: BigNumber, to: string, value: BigNumber) => {
+		this.mintContract.on('Unfreeze', async (action_id: BigNumber, to: string, value: BigNumber) => {
 			const ev = { type: SolEventT.Unfreeze, action_id, to, value };
 			await cb(ev);
 		});
-		this.mintContract.on(this.mintContract.filters.Transfer(), async (action_id: BigNumber, to: string, value: BigNumber) => {
+		this.mintContract.on('Transfer', async (action_id: BigNumber, to: string, value: BigNumber) => {
 			const ev = { type: SolEventT.Transfer, action_id, to, value };
 			await cb(ev);
-		})
+		});
 	}
 
 	async eventHandler(ev: SolEvent): Promise<TransferEvent | UnfreezeEvent | undefined> {
@@ -54,19 +54,21 @@ export class Web3Helper implements ChainEmitter<SolEvent, void, TransferEvent | 
     async emittedEventHandler(event: TransferEvent | UnfreezeEvent): Promise<void> {
 		let kind: string;
 		let action: string;
+		let tx: providers.TransactionResponse;
 		if (event instanceof TransferEvent) {
 			action = event.action_id.toString();
 			console.log(`target: ${event.to}, value: ${event.value}`)
-            await this.mintContract.validate_transfer(action, event.to, event.value.toString());
+            tx = await this.mintContract.validate_transfer(action, event.to, event.value.toString());
 			kind = "transfer"
         } else if (event instanceof UnfreezeEvent) {
 			action = event.id.toString();
-            await this.mintContract.validate_unfreeze(action, event.to, event.value.toString());
+            tx = await this.mintContract.validate_unfreeze(action, event.to, event.value.toString());
 			kind = "unfreeze"
         } else {
             throw Error("Unsupported event!");
         }
 	
+		await tx.wait();
 		console.log(`web3 ${kind} action_id: ${action}, executed`);
     }
 }
