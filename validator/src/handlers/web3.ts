@@ -23,7 +23,7 @@ export class Web3Helper implements ChainEmitter<SolEvent, void, TransferEvent | 
     }
 
     public static new = async function(provider_uri: string, pkey: string, minter: string, minterAbi: Interface): Promise<Web3Helper> {
-        const w3 = new providers.WebSocketProvider(provider_uri);
+        const w3 = new providers.JsonRpcProvider(provider_uri);
 		await w3.ready;
         const acc = (new Wallet(pkey)).connect(w3);
         const mint = new Contract(minter, minterAbi, acc);
