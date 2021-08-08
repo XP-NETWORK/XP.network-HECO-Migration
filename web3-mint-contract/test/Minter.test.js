@@ -30,17 +30,17 @@ describe('Minter', () => {
 	});
 
 	it('validate a simple transaction', async () => {
-		await minter.connect(owner)
+		await minter.connect(addr1)
 			.validate_transfer(1, addr3.address, TRANSFER_AMT);
 
-		await minter.connect(addr1)
+		await minter.connect(addr2)
 			.validate_transfer(1, addr3.address, TRANSFER_AMT);
 
 		const bal = await xpnet.balanceOf(addr3.address);
 		expect(bal).to.equal(TRANSFER_AMT);
-
-		await minter.connect(addr2)
-			.validate_transfer(1, addr3.address, TRANSFER_AMT);
+	
+		await minter.connect(owner)
+			.validate_transfer(1, add3.address, TRANSFER_AMT);
 	});
 
 	it('unfreeze test', async () => {
