@@ -18,6 +18,10 @@ module.exports = {
 	heco_testnet: {
 	  url: "https://http-testnet.hecochain.com",
 	  accounts: [process.env.SIGNER]
+	},
+	bsc: {
+		url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+		accounts: [process.env.SIGNER]
 	}
   }
 };

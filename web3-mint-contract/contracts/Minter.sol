@@ -7,12 +7,11 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 contract Minter {
 	uint256 private threshold;
 	uint256 private action_cnt = 0;
-	uint256 private nft_cnt = 1;
+	uint256 private nft_cnt = 0x10000; // reserve 0 - 0xffff for chain liquidity
 	XPNet private token;
 
     mapping (address=>uint8) private validators;
     uint256 public validator_cnt;
-	uint256 public wrap_token_id = 0;
 
 	enum ValidationRes {
 		Execute,
@@ -30,16 +29,17 @@ contract Minter {
 		uint256 validator_cnt;
 	}
 
-	// Transfer XPNET to WEB3
+	// Transfer Wrapped to WEB3
     struct TransferAction {
+		uint64 chain_nonce;
         address to;
         uint256 value;
     }
 
-	// transfer polkadot NFT to Web3
+	// transfer Wrapped NFT to Web3
 	struct TranferUniqueAction {
 		address to;
-		string data;
+		string data; // chain info is encoded by the validator here
 	}
 
 	// Unfreeze ETH here
@@ -48,10 +48,10 @@ contract Minter {
 		uint256 value;
 	}
 
-	event Transfer(uint256 action_id, string to, uint256 value); // Transfer ETH to polkadot
-	event TransferErc721(uint256 action_id, string to, string data); // Transfer Erc721 to polkadot
-	event TransferErc1155(uint256 action_id, string to, uint256 id, address contract_addr); // Transfer Erc1155 to polkadot
-	event Unfreeze(uint256 action_id, string to, uint256 value); // Unfreeze XPNET on polkadot
+	event Transfer(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Transfer ETH to polkadot
+	event TransferErc721(uint256 action_id, uint64 chain_nonce, string to, string data); // Transfer Erc721 to polkadot
+	event TransferErc1155(uint256 action_id, uint64 chain_nonce, string to, uint256 id, address contract_addr); // Transfer Erc1155 to polkadot
+	event Unfreeze(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Unfreeze XPNET on polkadot
 	event UnfreezeNft(uint256 action_id, string to, string data); // Unfreeze NFT on polkaot
 
     mapping (uint128=>ActionInfo) private actions;
@@ -95,10 +95,10 @@ contract Minter {
 	}
 
 	// Transfer XPNET
-    function validate_transfer(uint128 action_id, address to, uint256 value) public {
+    function validate_transfer(uint128 action_id, uint64 chain_nonce, address to, uint256 value) public {
 		ValidationRes res = validate_action(action_id, Action.Transfer);
 		if (res == ValidationRes.Execute) {
-			token.mint(to, wrap_token_id, value);
+			token.mint(to, chain_nonce, value);
 		}
     }
 
@@ -120,10 +120,10 @@ contract Minter {
 		}
 	}
 
-	// Withdraw XPNET
-	function withdraw(string memory to, uint256 value) public {
-		token.burn(msg.sender, wrap_token_id, value);
-		emit Unfreeze(action_cnt, to, value);
+	// Withdraw Wrapped token
+	function withdraw(string memory to, uint64 chain_nonce, uint256 value) public {
+		token.burn(msg.sender, chain_nonce, value);
+		emit Unfreeze(action_cnt, chain_nonce, to, value);
 		action_cnt += 1;
 	}
 
@@ -134,12 +134,13 @@ contract Minter {
 		token.burn(msg.sender, id, 1);
 		token.setURI(id, "");
 		emit UnfreezeNft(action_cnt, to, data);
+		action_cnt += 1;
 	}
 
 	// Transfer ETH to to Polka
-	function freeze(string memory to) public payable {
+	function freeze(uint64 chain_nonce, string memory to) public payable {
 		require(msg.value > 0, "value must be > 0!");
-		emit Transfer(action_cnt, to, msg.value);
+		emit Transfer(action_cnt, chain_nonce, to, msg.value);
 		action_cnt += 1;
 	}
 }
