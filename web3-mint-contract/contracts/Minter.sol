@@ -121,7 +121,7 @@ contract Minter {
 	}
 
 	// Withdraw Wrapped token
-	function withdraw(string memory to, uint64 chain_nonce, uint256 value) public {
+	function withdraw(uint64 chain_nonce, string memory to, uint256 value) public {
 		token.burn(msg.sender, chain_nonce, value);
 		emit Unfreeze(action_cnt, chain_nonce, to, value);
 		action_cnt += 1;
