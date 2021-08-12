@@ -22,6 +22,10 @@ module.exports = {
 	bsc: {
 		url: "https://data-seed-prebsc-1-s1.binance.org:8545",
 		accounts: [process.env.SIGNER]
+	},
+  	ropsten: {
+	  url: "https://ropsten.infura.io/v3/182b3d3fb2d14d5fbe7421348624d1ce",
+	  accounts: [process.env.SIGNER]
 	}
   }
 };
