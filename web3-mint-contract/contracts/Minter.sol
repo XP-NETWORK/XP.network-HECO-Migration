@@ -1,6 +1,8 @@
 pragma solidity ^0.8;
 
 import "./XPNet.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -26,7 +28,8 @@ contract Minter is ERC1155Receiver, IERC721Receiver {
 	enum Action {
 		Transfer,
 		TransferUnique,
-		Unfreeze
+		Unfreeze,
+		UnfreezeUnique
 	}
 
 	struct ActionInfo {
@@ -124,6 +127,21 @@ contract Minter is ERC1155Receiver, IERC721Receiver {
 			require(to.send(value), "FAILED TO TRANSFER?!");
 		}
 	}
+
+	function validate_unfreeze_erc1155(uint128 action_id, address to, uint256 tokenId, IERC1155 contract_addr) public {
+		ValidationRes res = validate_action(action_id, Action.UnfreezeUnique);
+		if (res == ValidationRes.Execute) {
+			contract_addr.safeTransferFrom(address(this), to, tokenId, 1, "");
+		}
+	}
+
+	function validate_unfreeze_erc721(uint128 action_id, address to, uint256 tokenId, IERC721 contract_addr) public {
+		ValidationRes res = validate_action(action_id, Action.UnfreezeUnique);
+		if (res == ValidationRes.Execute) {
+			contract_addr.safeTransferFrom(address(this), to, tokenId);
+		}
+	}
+
 
 	function _withdraw(address sender, uint64 chain_nonce, string calldata to, uint256 value) private {
 		require(chain_nonce < 0x1000, "Not a Fungible token!");
