@@ -111,13 +111,17 @@ contract Minter is ERC1155Receiver, IERC721Receiver {
     }
 
 	// Transfer Foreign NFT
-	function validate_transfer_nft(uint128 action_id, address to, string calldata data) public {
+	function validate_transfer_nft(uint128 action_id, address to, string calldata data) public  returns(uint256){
 		ValidationRes res = validate_action(action_id, Action.TransferUnique);
 		if (res == ValidationRes.Execute) {
 			token.mint(to, nft_cnt, 1);
-			nft_cnt += 1;
 			token.setURI(nft_cnt, data);
+			nft_cnt += 1;
+
+			return nft_cnt-1;
 		}
+
+		return 0;
 	}
 
 	// Unfreeze ETH
