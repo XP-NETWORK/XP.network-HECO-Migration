@@ -175,13 +175,13 @@ contract Minter is ERC1155Receiver, IERC721Receiver {
 	}
 
 	function onERC1155Received(
-		address caller,
+		address,
 		address,
 		uint256 id,
 		uint256 value,
 		bytes calldata data
 	) external override returns (bytes4) {
-		if (caller == address(token)) {
+		if (msg.sender == address(token)) {
 			if (id < 0x1000) {
 				_withdraw(address(this), id.toUint64(), string(data), value);
 			} else {
@@ -194,7 +194,7 @@ contract Minter is ERC1155Receiver, IERC721Receiver {
 			uint64 chain_nonce = data.toUint64(0);
 			string memory to = string(data.slice(8, data.length-8));
 
-			emit TransferErc1155(action_cnt, chain_nonce, to, id, caller);
+			emit TransferErc1155(action_cnt, chain_nonce, to, id, msg.sender);
 			action_cnt += 1;
 		}
 
