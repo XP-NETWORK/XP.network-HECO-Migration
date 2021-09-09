@@ -35,5 +35,9 @@ module.exports = {
       url: "https://rpc.testnet.fantom.network/",
       accounts: [process.env.SIGNER],
     },
+	avalanche: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+	  accounts: [process.env.SIGNER]
+    }
   },
 };
