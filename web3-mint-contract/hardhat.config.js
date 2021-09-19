@@ -43,5 +43,9 @@ module.exports = {
       url: "https://cronos-testnet.crypto.org:8545",
       accounts: [process.env.SIGNER],
     },
+    ethclassic: {
+      url: "https://www.ethercluster.com/mordor",
+      accounts: [process.env.SIGNER],
+    },
   },
 };
