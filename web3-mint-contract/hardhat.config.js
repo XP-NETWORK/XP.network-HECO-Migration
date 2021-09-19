@@ -35,9 +35,13 @@ module.exports = {
       url: "https://rpc.testnet.fantom.network/",
       accounts: [process.env.SIGNER],
     },
-	avalanche: {
+    avalanche: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
-	  accounts: [process.env.SIGNER]
-    }
+      accounts: [process.env.SIGNER],
+    },
+    cronos: {
+      url: "https://cronos-testnet.crypto.org:8545",
+      accounts: [process.env.SIGNER],
+    },
   },
 };
