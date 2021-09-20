@@ -47,5 +47,9 @@ module.exports = {
       url: "https://www.ethercluster.com/mordor",
       accounts: [process.env.SIGNER],
     },
+    celo: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts: [process.env.SIGNER],
+    },
   },
 };
