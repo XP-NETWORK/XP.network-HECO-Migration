@@ -54,6 +54,10 @@ module.exports = {
     vechain: {
         url: "https://testing-bridge.xp.network/vechain/",
         accounts: [process.env.SIGNER]
+    },
+    harmony: {
+      url: "https://api.s0.b.hmny.io",
+      accounts: [process.env.SIGNER],
     }
   },
 };
