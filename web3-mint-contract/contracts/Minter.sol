@@ -34,7 +34,9 @@ contract Minter is IERC721Receiver {
 		UnfreezeUnique,
 
 		// Multisig
-		WhitelistNft
+		WhitelistNft,
+		AddValidator,
+		RemoveValidator
 	}
 
 	struct ActionInfo {
@@ -159,6 +161,26 @@ contract Minter is IERC721Receiver {
 			nft_whitelist[contract_addr] = 2;
 		}
 	}
+
+	function validate_add_validator(uint128 action_id, address new_validator) public {
+		require(validators[new_validator] != 2, "already a validator");
+
+		ValidationRes res = validate_action(action_id, Action.AddValidator);
+		if (res == ValidationRes.Execute) {
+			validators[new_validator] = 2;
+		}
+	}
+
+	function validate_remove_validator(uint128 action_id, address old_validator) public {
+		require(validators[old_validator] == 2, "given address is not a validator");
+		require(msg.sender != old_validator, "you can't remove yourself");
+
+		ValidationRes res = validate_action(action_id, Action.RemoveValidator);
+		if (res == ValidationRes.Execute) {
+				validators[old_validator] = 0;
+		}
+	}
+
 
 	function _withdraw(address sender, uint64 chain_nonce, string calldata to, uint256 value) private {
 		token.burn(sender, chain_nonce, value);
