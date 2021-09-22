@@ -158,7 +158,7 @@ contract Minter is IERC721Receiver {
 
 		ValidationRes res = validate_action(action_id, Action.WhitelistNft);
 		if (res == ValidationRes.Execute) {
-			nft_whitelist[contract_addr] = 2;
+			nft_whitelist[address(contract_addr)] = 2;
 		}
 	}
 
