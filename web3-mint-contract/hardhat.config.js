@@ -51,5 +51,9 @@ module.exports = {
       url: "https://alfajores-forno.celo-testnet.org",
       accounts: [process.env.SIGNER],
     },
+    vechain: {
+        url: "https://testing-bridge.xp.network/vechain/",
+        accounts: [process.env.SIGNER]
+    }
   },
 };
