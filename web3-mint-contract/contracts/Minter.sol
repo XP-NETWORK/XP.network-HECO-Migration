@@ -18,6 +18,7 @@ contract Minter is IERC721Receiver {
 	XPNet private token;
 
   mapping (address=>uint8) private validators;
+	mapping (address=>uint8) private nft_whitelist;
   uint256 public validator_cnt;
 
 	enum ValidationRes {
@@ -26,10 +27,14 @@ contract Minter is IERC721Receiver {
 	}
 
 	enum Action {
+		// Bridge actions
 		Transfer,
 		TransferUnique,
 		Unfreeze,
-		UnfreezeUnique
+		UnfreezeUnique,
+
+		// Multisig
+		WhitelistNft
 	}
 
 	struct ActionInfo {
@@ -64,13 +69,17 @@ contract Minter is IERC721Receiver {
 	mapping (uint128=>ActionInfo) private actions;
 	mapping (uint128=>mapping (address=>uint8)) private action_validators;
 
-	constructor(address[] memory _validators, uint16 _threshold, XPNft _nft_token, XPNet _token) {
+	constructor(address[] memory _validators, IERC721[] memory _nft_whitelist, uint16 _threshold, XPNft _nft_token, XPNet _token) {
 		require(_validators.length > 0, "Validators must not be empty!");
 		require(_threshold > 0 && _threshold <= _validators.length, "invalid threshold!");
 
 		for (uint i = 0; i < _validators.length; i++) {
 			validators[_validators[i]] = 2;
 		}
+		for (uint i = 0; i < _nft_whitelist.length; i++) {
+			nft_whitelist[address(_nft_whitelist[i])] = 2;
+		}
+
 		validator_cnt = _validators.length;
 		threshold = _threshold;
 		nft_token = _nft_token;
@@ -86,6 +95,7 @@ contract Minter is IERC721Receiver {
 			require(action_validators[action_id][msg.sender] != 2, "Duplicate Validator!");
 			actions[action_id].validator_cnt += 1;
 		}
+		// TODO: Check if action matches
 
 		action_validators[action_id][msg.sender] = 2;
 
@@ -133,12 +143,22 @@ contract Minter is IERC721Receiver {
 	}
 
 	function validate_unfreeze_nft(uint128 action_id, address to, uint256 tokenId, IERC721 contract_addr) public {
+		require(nft_whitelist[address(contract_addr)] == 2, "NFT not whitelisted?!");
+
 		ValidationRes res = validate_action(action_id, Action.UnfreezeUnique);
 		if (res == ValidationRes.Execute) {
 			contract_addr.safeTransferFrom(address(this), to, tokenId);
 		}
 	}
 
+	function validate_whitelist_nft(uint128 action_id, IERC721 contract_addr) public {
+		require(nft_whitelist[address(contract_addr)] != 2, "NFT already whitelisted");
+
+		ValidationRes res = validate_action(action_id, Action.WhitelistNft);
+		if (res == ValidationRes.Execute) {
+			nft_whitelist[contract_addr] = 2;
+		}
+	}
 
 	function _withdraw(address sender, uint64 chain_nonce, string calldata to, uint256 value) private {
 		token.burn(sender, chain_nonce, value);
@@ -173,6 +193,9 @@ contract Minter is IERC721Receiver {
 		uint256 tokenId,
 		bytes calldata data
 	) public virtual override returns (bytes4) {
+		require(nft_whitelist[caller] == 2, "This NFT contract is not whitelisted");
+		require(IERC721(caller).ownerOf(tokenId) == address(this), "NFT not received");
+
 		uint64 chain_nonce = data.toUint64(0);
 		string memory to = string(data.slice(8, data.length-8));
 
