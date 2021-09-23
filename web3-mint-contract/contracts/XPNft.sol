@@ -8,7 +8,7 @@ contract XPNft is ERC721URIStorage, Ownable {
 
 	function mint(address to, uint256 id) public onlyOwner {
 		_safeMint(to, id);
-  }
+	}
 
 	function burn(uint256 id) public onlyOwner {
 		_burn(id);

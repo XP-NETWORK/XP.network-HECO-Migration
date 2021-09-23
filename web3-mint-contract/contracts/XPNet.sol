@@ -9,8 +9,8 @@ contract XPNet is ERC1155, Ownable {
 	constructor() ERC1155("XPWRP") {}
 
 	function mint(address to, uint256 id, uint256 amount) public onlyOwner {
-        _mint(to, id, amount, "");
-    }
+		_mint(to, id, amount, "");
+	}
 
 	function burn(address from, uint256 id, uint256 amount) public onlyOwner {
 		_burn(from, id, amount);

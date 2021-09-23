@@ -18,9 +18,9 @@ contract Minter is IERC721Receiver, Pausable {
 	XPNft private nft_token;
 	XPNet private token;
 
-  mapping (address=>uint8) private validators;
+	mapping (address=>uint8) private validators;
 	mapping (address=>uint8) private nft_whitelist;
-  uint256 public validator_cnt;
+	uint256 public validator_cnt;
 
 	enum ValidationRes {
 		Execute,
@@ -50,11 +50,11 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	// Transfer Wrapped to WEB3
-    struct TransferAction {
+	struct TransferAction {
 		uint64 chain_nonce;
-        address to;
-        uint256 value;
-    }
+		address to;
+		uint256 value;
+	}
 
 	// transfer Wrapped NFT to Web3
 	struct TranferUniqueAction {
@@ -182,7 +182,7 @@ contract Minter is IERC721Receiver, Pausable {
 
 		ValidationRes res = validate_action(action_id, Action.RemoveValidator);
 		if (res == ValidationRes.Execute) {
-				validators[old_validator] = 0;
+			validators[old_validator] = 0;
 		}
 	}
 
