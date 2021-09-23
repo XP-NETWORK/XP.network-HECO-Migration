@@ -247,7 +247,7 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	// Withdraw Foreign NFT
-	function withdraw_nft(string calldata to, uint256 id) public {
+	function withdraw_nft(string calldata to, uint256 id) public whenNotPaused {
 		_withdraw_nft(msg.sender, to, id);
 	}
 
