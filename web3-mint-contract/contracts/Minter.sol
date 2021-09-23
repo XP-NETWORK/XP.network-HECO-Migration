@@ -48,6 +48,8 @@ contract Minter is IERC721Receiver, Pausable {
 		Action action;
 		bytes action_data;
 		uint256 validator_cnt;
+		uint256 read_cnt;
+		bool exec;
 	}
 
 	struct TransferAction {
@@ -76,6 +78,7 @@ contract Minter is IERC721Receiver, Pausable {
 	event TransferErc721(uint256 action_id, uint64 chain_nonce, string to, uint256 id, address contract_addr); // Transfer Erc721 to polkadot
 	event Unfreeze(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Unfreeze XPNET on polkadot
 	event UnfreezeNft(uint256 action_id, string to, string data); // Unfreeze NFT on polkaot
+	event QuorumFailure(uint256 action_id, Action action, bytes action_data);
 
 	mapping (uint128=>ActionInfo) private actions;
 	mapping (uint128=>mapping (address=>uint8)) private action_validators;
@@ -101,9 +104,11 @@ contract Minter is IERC721Receiver, Pausable {
 		require(validators[msg.sender] == 2, "Not a validator!");
 
 		if (actions[action_id].validator_cnt == 0) {
-			actions[action_id] = ActionInfo(action, action_data, 1);
+			actions[action_id] = ActionInfo(action, action_data, 1, 1, false);
 		} else {
 			require(action_validators[action_id][msg.sender] != 2, "Duplicate Validator!");
+
+			actions[action_id].read_cnt += 1;
 			require(actions[action_id].action == action, "Action Mismatch");
 			require(actions[action_id].action_data.equal(action_data), "Action Mismatch");
 			actions[action_id].validator_cnt += 1;
@@ -116,9 +121,12 @@ contract Minter is IERC721Receiver, Pausable {
 			res = ValidationRes.Execute;
 		}
 
-		if (actions[action_id].validator_cnt == validator_cnt) {
+		if (actions[action_id].read_cnt == validator_cnt) {
 			delete actions[action_id];
-			// TODO: Should we clear action_validators?
+			if (!actions[action_id].exec) {
+				// _pause(); (should we pause?)
+				emit QuorumFailure(action_id, action, action_data); // Quorum Failed, manual intervention required
+			}
 		}
 
 		return res;
