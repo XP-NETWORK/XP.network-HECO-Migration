@@ -230,7 +230,7 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	function validate_set_threshold(uint128 action_id, uint16 new_threshold) public whenNotPaused {
-		require(new_threshold >= validator_cnt, "validators must be <= validators length");
+		require(new_threshold <= validator_cnt, "validators must be <= validators length");
 
 		bytes memory action_data = abi.encodePacked(new_threshold);
 		ValidationRes res = validate_action(action_id, Action.SetThreshold, action_data);
@@ -267,7 +267,7 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	function onERC721Received(
-		address caller,
+		address,
 		address,
 		uint256 tokenId,
 		bytes calldata data
@@ -278,7 +278,7 @@ contract Minter is IERC721Receiver, Pausable {
 		uint64 chain_nonce = data.toUint64(0);
 		string memory to = string(data.slice(8, data.length-8));
 
-		emit TransferErc721(action_cnt, chain_nonce, to, tokenId, caller);
+		emit TransferErc721(action_cnt, chain_nonce, to, tokenId, msg.sender);
 		action_cnt += 1;
 		return this.onERC721Received.selector;
 	}

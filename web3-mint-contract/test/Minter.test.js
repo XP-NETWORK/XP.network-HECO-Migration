@@ -186,8 +186,8 @@ describe('Minter', () => {
 
 		await tx.wait();
 
-		const owner = await erc721.ownerOf(1)
-		expect(owner).to.equal(minter.address);
+		const own = await erc721.ownerOf(1)
+		expect(own).to.equal(minter.address);
 	});
 
 	it('unfreeze nft from foreign', async () => {
@@ -195,17 +195,16 @@ describe('Minter', () => {
 
 		await tx.wait();
 
-		await validate_unfreeze_nft(1, addr3.address, 1, er721.address);
+		await validate_unfreeze_nft(1, addr3.address, 1, erc721.address);
 
-		const owner = await erc721.ownerOf(1);
-		expect(owner).to.equal(addr3.address);
-	});
+		const own = await erc721.ownerOf(1);
+		expect(own).to.equal(addr3.address);
+	}).timeout(30000);
 
 	it('validate whitelist nft', async () => {
 		const Erc721 = await ethers.getContractFactory("XPNft");
 		const erc721f = await Erc721.deploy();
 
-		const tx = await validate_whitelist_nft(1, erc721f.address);
-		await tx.wait();
+		await validate_whitelist_nft(1, erc721f.address);
 	})
 })
