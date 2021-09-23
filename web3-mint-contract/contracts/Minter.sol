@@ -41,7 +41,8 @@ contract Minter is IERC721Receiver, Pausable {
 
 		// Multisig
 		AddValidator,
-		RemoveValidator
+		RemoveValidator,
+		SetThreshold
 	}
 
 	struct ActionInfo {
@@ -119,6 +120,7 @@ contract Minter is IERC721Receiver, Pausable {
 		ValidationRes res = ValidationRes.Noop;
 		if (actions[action_id].validator_cnt == threshold) {
 			res = ValidationRes.Execute;
+			actions[action_id].exec = true;
 		}
 
 		if (actions[action_id].read_cnt == validator_cnt) {
@@ -192,10 +194,12 @@ contract Minter is IERC721Receiver, Pausable {
 		ValidationRes res = validate_action(action_id, Action.AddValidator, action_data);
 		if (res == ValidationRes.Execute) {
 			validators[new_validator] = 2;
+			validator_cnt += 1;
 		}
 	}
 
 	function validate_remove_validator(uint128 action_id, address old_validator) public whenNotPaused {
+		require(threshold <= validator_cnt-1, "update the threshold before removing this validator!");
 		require(validators[old_validator] == 2, "given address is not a validator");
 		require(msg.sender != old_validator, "you can't remove yourself");
 
@@ -203,6 +207,7 @@ contract Minter is IERC721Receiver, Pausable {
 		ValidationRes res = validate_action(action_id, Action.RemoveValidator, action_data);
 		if (res == ValidationRes.Execute) {
 			validators[old_validator] = 0;
+			validator_cnt -= 1;
 		}
 	}
 
@@ -224,6 +229,16 @@ contract Minter is IERC721Receiver, Pausable {
 		}
 	}
 
+	function validate_set_threshold(uint128 action_id, uint16 new_threshold) public whenNotPaused {
+		require(new_threshold >= validator_cnt, "validators must be <= validators length");
+
+		bytes memory action_data = abi.encodePacked(new_threshold);
+		ValidationRes res = validate_action(action_id, Action.SetThreshold, action_data);
+		if (res == ValidationRes.Execute) {
+			threshold = new_threshold;
+		}
+	}
+
 	function _withdraw(address sender, uint64 chain_nonce, string calldata to, uint256 value) private {
 		token.burn(sender, chain_nonce, value);
 		emit Unfreeze(action_cnt, chain_nonce, to, value);
@@ -240,8 +255,8 @@ contract Minter is IERC721Receiver, Pausable {
 
 		string memory data = nft_token.tokenURI(id);
 
-		nft_token.burn(id);
 		nft_token.setURI(id, "");
+		nft_token.burn(id);
 		emit UnfreezeNft(action_cnt, to, data);
 		action_cnt += 1;
 	}
@@ -258,8 +273,7 @@ contract Minter is IERC721Receiver, Pausable {
 		bytes calldata data
 	) public virtual override returns (bytes4) {
 		require(!paused(), "Bridge Paused");
-		require(nft_whitelist[caller] == 2, "This NFT contract is not whitelisted");
-		require(IERC721(caller).ownerOf(tokenId) == address(this), "NFT not received");
+		require(nft_whitelist[msg.sender] == 2, "This NFT contract is not whitelisted");
 
 		uint64 chain_nonce = data.toUint64(0);
 		string memory to = string(data.slice(8, data.length-8));
