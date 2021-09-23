@@ -46,26 +46,30 @@ contract Minter is IERC721Receiver, Pausable {
 
 	struct ActionInfo {
 		Action action;
+		bytes action_data;
 		uint256 validator_cnt;
 	}
 
-	// Transfer Wrapped to WEB3
 	struct TransferAction {
 		uint64 chain_nonce;
 		address to;
 		uint256 value;
 	}
 
-	// transfer Wrapped NFT to Web3
-	struct TranferUniqueAction {
+	struct TransferNftAction {
 		address to;
-		string data; // chain info is encoded by the validator here
+		string data;
 	}
 
-	// Unfreeze ETH here
 	struct UnfreezeAction {
 		address to;
 		uint256 value;
+	}
+
+	struct UnfreezeNftAction {
+		address to;
+		uint256 tokenId;
+		address contract_addr;
 	}
 
 	event Transfer(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Transfer ETH to polkadot
@@ -93,16 +97,17 @@ contract Minter is IERC721Receiver, Pausable {
 		token = _token;
 	}
 
-	function validate_action(uint128 action_id, Action action) private returns (ValidationRes) {
+	function validate_action(uint128 action_id, Action action, bytes memory action_data) private returns (ValidationRes) {
 		require(validators[msg.sender] == 2, "Not a validator!");
 
 		if (actions[action_id].validator_cnt == 0) {
-			actions[action_id] = ActionInfo(action, 1);
+			actions[action_id] = ActionInfo(action, action_data, 1);
 		} else {
 			require(action_validators[action_id][msg.sender] != 2, "Duplicate Validator!");
+			require(actions[action_id].action == action, "Action Mismatch");
+			require(actions[action_id].action_data.equal(action_data), "Action Mismatch");
 			actions[action_id].validator_cnt += 1;
 		}
-		// TODO: Check if action matches
 
 		action_validators[action_id][msg.sender] = 2;
 
@@ -121,7 +126,8 @@ contract Minter is IERC721Receiver, Pausable {
 
 	// Transfer XPNET
 	function validate_transfer(uint128 action_id, uint64 chain_nonce, address to, uint256 value) public whenNotPaused {
-		ValidationRes res = validate_action(action_id, Action.Transfer);
+		bytes memory action_data = abi.encode(TransferAction(chain_nonce, to, value));
+		ValidationRes res = validate_action(action_id, Action.Transfer, action_data);
 		if (res == ValidationRes.Execute) {
 			token.mint(to, chain_nonce, value);
 		}
@@ -129,7 +135,8 @@ contract Minter is IERC721Receiver, Pausable {
 
 	// Transfer Foreign NFT
 	function validate_transfer_nft(uint128 action_id, address to, string calldata data) public whenNotPaused returns(uint256){
-		ValidationRes res = validate_action(action_id, Action.TransferUnique);
+		bytes memory action_data = abi.encode(TransferNftAction(to, data));
+		ValidationRes res = validate_action(action_id, Action.TransferUnique, action_data);
 		if (res == ValidationRes.Execute) {
 			nft_token.mint(to, nft_cnt);
 			nft_token.setURI(nft_cnt, data);
@@ -143,7 +150,8 @@ contract Minter is IERC721Receiver, Pausable {
 
 	// Unfreeze ETH
 	function validate_unfreeze(uint128 action_id, address payable to, uint256 value) public whenNotPaused {
-		ValidationRes res = validate_action(action_id, Action.Unfreeze);
+		bytes memory action_data = abi.encode(UnfreezeAction(to, value));
+		ValidationRes res = validate_action(action_id, Action.Unfreeze, action_data);
 		if (res == ValidationRes.Execute) {
 			require(to.send(value), "FAILED TO TRANSFER?!");
 		}
@@ -152,7 +160,8 @@ contract Minter is IERC721Receiver, Pausable {
 	function validate_unfreeze_nft(uint128 action_id, address to, uint256 tokenId, IERC721 contract_addr) public whenNotPaused {
 		require(nft_whitelist[address(contract_addr)] == 2, "NFT not whitelisted?!");
 
-		ValidationRes res = validate_action(action_id, Action.UnfreezeUnique);
+		bytes memory action_data = abi.encode(UnfreezeNftAction(to, tokenId, address(contract_addr)));
+		ValidationRes res = validate_action(action_id, Action.UnfreezeUnique, action_data);
 		if (res == ValidationRes.Execute) {
 			contract_addr.safeTransferFrom(address(this), to, tokenId);
 		}
@@ -161,7 +170,8 @@ contract Minter is IERC721Receiver, Pausable {
 	function validate_whitelist_nft(uint128 action_id, IERC721 contract_addr) public whenNotPaused {
 		require(nft_whitelist[address(contract_addr)] != 2, "NFT already whitelisted");
 
-		ValidationRes res = validate_action(action_id, Action.WhitelistNft);
+		bytes memory action_data = abi.encodePacked(address(contract_addr));
+		ValidationRes res = validate_action(action_id, Action.WhitelistNft, action_data);
 		if (res == ValidationRes.Execute) {
 			nft_whitelist[address(contract_addr)] = 2;
 		}
@@ -170,7 +180,8 @@ contract Minter is IERC721Receiver, Pausable {
 	function validate_add_validator(uint128 action_id, address new_validator) public whenNotPaused {
 		require(validators[new_validator] != 2, "already a validator");
 
-		ValidationRes res = validate_action(action_id, Action.AddValidator);
+		bytes memory action_data = abi.encodePacked(new_validator);
+		ValidationRes res = validate_action(action_id, Action.AddValidator, action_data);
 		if (res == ValidationRes.Execute) {
 			validators[new_validator] = 2;
 		}
@@ -180,21 +191,26 @@ contract Minter is IERC721Receiver, Pausable {
 		require(validators[old_validator] == 2, "given address is not a validator");
 		require(msg.sender != old_validator, "you can't remove yourself");
 
-		ValidationRes res = validate_action(action_id, Action.RemoveValidator);
+		bytes memory action_data = abi.encodePacked(old_validator);
+		ValidationRes res = validate_action(action_id, Action.RemoveValidator, action_data);
 		if (res == ValidationRes.Execute) {
 			validators[old_validator] = 0;
 		}
 	}
 
 	function validate_pause_bridge(uint128 action_id) public whenNotPaused {
-		ValidationRes res = validate_action(action_id, Action.PauseBridge);
+		bytes memory action_data = "";
+
+		ValidationRes res = validate_action(action_id, Action.PauseBridge, action_data);
 		if (res == ValidationRes.Execute) {
 			_pause();
 		}
 	}
 
 	function validate_unpause_bridge(uint128 action_id) public whenPaused {
-		ValidationRes res = validate_action(action_id, Action.UnpauseBridge);
+		bytes memory action_data = "";
+
+		ValidationRes res = validate_action(action_id, Action.UnpauseBridge, action_data);
 		if (res == ValidationRes.Execute) {
 			_unpause();
 		}
