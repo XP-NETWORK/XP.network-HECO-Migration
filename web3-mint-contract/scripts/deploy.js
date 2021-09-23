@@ -15,7 +15,7 @@ async function main() {
 
   const nft_token = await deploy("XPNft");
   const token = await deploy("XPNet");
-  const minter = await deploy("Minter", [owner.address], [mint_default], 1, nft_token.address, token.address);
+  const minter = await deploy("Minter", [owner.address], [mint_default.address], 1, nft_token.address, token.address);
 
   await nft_token.transferOwnership(minter.address);
   await token.transferOwnership(minter.address);
