@@ -50,7 +50,6 @@ contract Minter is IERC721Receiver, Pausable {
 		bytes action_data;
 		uint256 validator_cnt;
 		uint256 read_cnt;
-		bool exec;
 	}
 
 	struct TransferAction {
@@ -105,7 +104,7 @@ contract Minter is IERC721Receiver, Pausable {
 		require(validators[msg.sender] == 2, "Not a validator!");
 
 		if (actions[action_id].validator_cnt == 0) {
-			actions[action_id] = ActionInfo(action, action_data, 1, 1, false);
+			actions[action_id] = ActionInfo(action, action_data, 1, 1);
 		} else {
 			require(action_validators[action_id][msg.sender] != 2, "Duplicate Validator!");
 
@@ -120,12 +119,11 @@ contract Minter is IERC721Receiver, Pausable {
 		ValidationRes res = ValidationRes.Noop;
 		if (actions[action_id].validator_cnt == threshold) {
 			res = ValidationRes.Execute;
-			actions[action_id].exec = true;
 		}
 
 		if (actions[action_id].read_cnt == validator_cnt) {
 			delete actions[action_id];
-			if (!actions[action_id].exec) {
+			if (actions[action_id].validator_cnt < threshold) {
 				// _pause(); (should we pause?)
 				emit QuorumFailure(action_id); // Quorum Failed, manual intervention required
 			}
