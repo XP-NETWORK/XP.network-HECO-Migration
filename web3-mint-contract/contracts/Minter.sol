@@ -79,7 +79,7 @@ contract Minter is IERC721Receiver, Pausable {
 	event TransferErc721(uint256 action_id, uint64 chain_nonce, string to, uint256 id, address contract_addr); // Transfer Erc721 to polkadot
 	event Unfreeze(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Unfreeze XPNET on polkadot
 	event UnfreezeNft(uint256 action_id, string to, string data); // Unfreeze NFT on polkaot
-	event QuorumFailure(uint256 action_id, Action action, bytes action_data);
+	event QuorumFailure(uint256 action_id);
 
 	mapping (uint128=>ActionInfo) private actions;
 	mapping (uint128=>mapping (address=>uint8)) private action_validators;
@@ -127,7 +127,7 @@ contract Minter is IERC721Receiver, Pausable {
 			delete actions[action_id];
 			if (!actions[action_id].exec) {
 				// _pause(); (should we pause?)
-				emit QuorumFailure(action_id, action, action_data); // Quorum Failed, manual intervention required
+				emit QuorumFailure(action_id); // Quorum Failed, manual intervention required
 			}
 		}
 
@@ -144,7 +144,7 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	// Transfer Foreign NFT
-	function validate_transfer_nft(uint128 action_id, address to, string calldata data) public whenNotPaused returns(uint256){
+	function validate_transfer_nft(uint128 action_id, address to, string calldata data) public whenNotPaused returns(uint256) {
 		bytes memory action_data = abi.encode(TransferNftAction(to, data));
 		ValidationRes res = validate_action(action_id, Action.TransferUnique, action_data);
 		if (res == ValidationRes.Execute) {
