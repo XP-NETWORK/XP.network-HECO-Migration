@@ -269,8 +269,7 @@ contract Minter is IERC721Receiver, Pausable {
 		address,
 		uint256 tokenId,
 		bytes calldata data
-	) public virtual override returns (bytes4) {
-		require(!paused(), "Bridge Paused");
+	) public virtual override whenNotPaused returns (bytes4) {
 		require(nft_whitelist[msg.sender] == 2, "This NFT contract is not whitelisted");
 
 		uint64 chain_nonce = data.toUint64(0);
