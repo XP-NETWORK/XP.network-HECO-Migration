@@ -3,12 +3,13 @@ pragma solidity ^0.8;
 import "./XPNft.sol";
 import "./XPNet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 
-contract Minter is Pausable {
+contract Minter is Pausable, ERC721Holder {
 	using BytesLib for bytes;
 	using SafeCast for uint256;
 	using EnumerableSet for EnumerableSet.AddressSet;
