@@ -3,24 +3,25 @@ pragma solidity ^0.8;
 import "./XPNft.sol";
 import "./XPNet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 
-contract Minter is IERC721Receiver, Pausable {
+contract Minter is Pausable {
 	using BytesLib for bytes;
 	using SafeCast for uint256;
+	using EnumerableSet for EnumerableSet.AddressSet;
 
 	uint256 private threshold;
 	uint256 private action_cnt = 0;
 	uint256 private nft_cnt = 0x0;
+	uint256 private tx_fees = 0x0;
 	XPNft private nft_token;
 	XPNet private token;
 
-	mapping (address=>uint8) private validators;
+	EnumerableSet.AddressSet private validators;
 	mapping (address=>uint8) private nft_whitelist;
-	uint256 public validator_cnt;
 
 	enum ValidationRes {
 		Execute,
@@ -42,7 +43,8 @@ contract Minter is IERC721Receiver, Pausable {
 		// Multisig
 		AddValidator,
 		RemoveValidator,
-		SetThreshold
+		SetThreshold,
+		WithdrawFees
 	}
 
 	struct ActionInfo {
@@ -74,34 +76,38 @@ contract Minter is IERC721Receiver, Pausable {
 		address contract_addr;
 	}
 
-	event Transfer(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Transfer ETH to polkadot
-	event TransferErc721(uint256 action_id, uint64 chain_nonce, string to, uint256 id, address contract_addr); // Transfer Erc721 to polkadot
-	event Unfreeze(uint256 action_id, uint64 chain_nonce, string to, uint256 value); // Unfreeze XPNET on polkadot
-	event UnfreezeNft(uint256 action_id, string to, string data); // Unfreeze NFT on polkaot
+	event Transfer(uint256 action_id, uint64 chain_nonce, uint256 txFees, string to, uint256 value); // Transfer ETH to polkadot
+	event TransferErc721(uint256 action_id, uint64 chain_nonce, uint256 txFees, string to, uint256 id, address contract_addr); // Transfer Erc721 to polkadot
+	event Unfreeze(uint256 action_id, uint64 chain_nonce, uint256 txFees, string to, uint256 value); // Unfreeze XPNET on polkadot
+	event UnfreezeNft(uint256 action_id, uint256 txFees, string to, string data); // Unfreeze NFT on polkaot
 	event QuorumFailure(uint256 action_id);
 
 	mapping (uint128=>ActionInfo) private actions;
 	mapping (uint128=>mapping (address=>uint8)) private action_validators;
+
+	modifier requireFees {
+		require(msg.value > 0, "Tx Fees is required!");
+		_;
+	}
 
 	constructor(address[] memory _validators, IERC721[] memory _nft_whitelist, uint16 _threshold, XPNft _nft_token, XPNet _token) {
 		require(_validators.length > 0, "Validators must not be empty!");
 		require(_threshold > 0 && _threshold <= _validators.length, "invalid threshold!");
 
 		for (uint i = 0; i < _validators.length; i++) {
-			validators[_validators[i]] = 2;
+			validators.add(_validators[i]);
 		}
 		for (uint i = 0; i < _nft_whitelist.length; i++) {
 			nft_whitelist[address(_nft_whitelist[i])] = 2;
 		}
 
-		validator_cnt = _validators.length;
 		threshold = _threshold;
 		nft_token = _nft_token;
 		token = _token;
 	}
 
 	function validate_action(uint128 action_id, Action action, bytes memory action_data) private returns (ValidationRes) {
-		require(validators[msg.sender] == 2, "Not a validator!");
+		require(validators.contains(msg.sender), "Not a validator!");
 
 		if (actions[action_id].validator_cnt == 0) {
 			actions[action_id] = ActionInfo(action, action_data, 1, 1);
@@ -121,7 +127,7 @@ contract Minter is IERC721Receiver, Pausable {
 			res = ValidationRes.Execute;
 		}
 
-		if (actions[action_id].read_cnt == validator_cnt) {
+		if (actions[action_id].read_cnt == validators.length()) {
 			delete actions[action_id];
 			if (actions[action_id].validator_cnt < threshold) {
 				// _pause(); (should we pause?)
@@ -186,26 +192,24 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	function validate_add_validator(uint128 action_id, address new_validator) public whenNotPaused {
-		require(validators[new_validator] != 2, "already a validator");
+		require(!validators.contains(new_validator), "already a validator");
 
 		bytes memory action_data = abi.encodePacked(new_validator);
 		ValidationRes res = validate_action(action_id, Action.AddValidator, action_data);
 		if (res == ValidationRes.Execute) {
-			validators[new_validator] = 2;
-			validator_cnt += 1;
+			validators.add(new_validator);
 		}
 	}
 
 	function validate_remove_validator(uint128 action_id, address old_validator) public whenNotPaused {
-		require(threshold <= validator_cnt-1, "update the threshold before removing this validator!");
-		require(validators[old_validator] == 2, "given address is not a validator");
+		require(threshold <= validators.length()-1, "update the threshold before removing this validator!");
+		require(validators.contains(old_validator), "given address is not a validator");
 		require(msg.sender != old_validator, "you can't remove yourself");
 
 		bytes memory action_data = abi.encodePacked(old_validator);
 		ValidationRes res = validate_action(action_id, Action.RemoveValidator, action_data);
 		if (res == ValidationRes.Execute) {
-			validators[old_validator] = 0;
-			validator_cnt -= 1;
+			validators.remove(old_validator);
 		}
 	}
 
@@ -228,7 +232,7 @@ contract Minter is IERC721Receiver, Pausable {
 	}
 
 	function validate_set_threshold(uint128 action_id, uint16 new_threshold) public whenNotPaused {
-		require(new_threshold <= validator_cnt, "validators must be <= validators length");
+		require(new_threshold <= validators.length(), "validators must be <= validators length");
 
 		bytes memory action_data = abi.encodePacked(new_threshold);
 		ValidationRes res = validate_action(action_id, Action.SetThreshold, action_data);
@@ -237,14 +241,34 @@ contract Minter is IERC721Receiver, Pausable {
 		}
 	}
 
+	function _withdraw_fees() private {
+		uint validator_cnt = validators.length();
+
+		// This is not perfect but the residual value can't be greater than validator_cnt which should be minimal compared to total fees collected (> 1E18!)
+		uint256 per_acc = tx_fees / validator_cnt;
+		for (uint i = 0; i < validator_cnt; i++) {
+			payable(validators.at(i)).transfer(per_acc);
+			tx_fees -= per_acc;
+		}
+	}
+
+	function validate_withdraw_fees(uint128 action_id) public {
+		bytes memory action_data = "";
+		ValidationRes res = validate_action(action_id, Action.WithdrawFees, action_data);
+		if (res == ValidationRes.Execute) {
+			_withdraw_fees();
+		}
+	}
+
 	function _withdraw(address sender, uint64 chain_nonce, string calldata to, uint256 value) private {
 		token.burn(sender, chain_nonce, value);
-		emit Unfreeze(action_cnt, chain_nonce, to, value);
+		emit Unfreeze(action_cnt, chain_nonce, msg.value, to, value);
 		action_cnt += 1;
+		tx_fees += msg.value;
 	}
 
 	// Withdraw Wrapped token
-	function withdraw(uint64 chain_nonce, string calldata to, uint256 value) public whenNotPaused {
+	function withdraw(uint64 chain_nonce, string calldata to, uint256 value) public requireFees whenNotPaused payable {
 		_withdraw(msg.sender, chain_nonce, to, value);
 	}
 
@@ -255,35 +279,33 @@ contract Minter is IERC721Receiver, Pausable {
 
 		nft_token.setURI(id, "");
 		nft_token.burn(id);
-		emit UnfreezeNft(action_cnt, to, data);
+		emit UnfreezeNft(action_cnt, msg.value, to, data);
 		action_cnt += 1;
+		tx_fees += msg.value;
 	}
 
 	// Withdraw Foreign NFT
-	function withdraw_nft(string calldata to, uint256 id) public whenNotPaused {
+	function withdraw_nft(string calldata to, uint256 id) public requireFees whenNotPaused payable {
 		_withdraw_nft(msg.sender, to, id);
 	}
 
-	function onERC721Received(
-		address,
-		address,
-		uint256 tokenId,
-		bytes calldata data
-	) public virtual override whenNotPaused returns (bytes4) {
-		require(nft_whitelist[msg.sender] == 2, "This NFT contract is not whitelisted");
+	// Freeze erc721 token, requires approval to transfer
+	function freeze_erc721(IERC721 erc721_contract, uint256 tokenId, uint64 chain_nonce, string calldata to) public requireFees whenNotPaused payable {
+		require(nft_whitelist[address(erc721_contract)] == 2, "This NFT contract is not whitelisted");
 
-		uint64 chain_nonce = data.toUint64(0);
-		string memory to = string(data.slice(8, data.length-8));
-
-		emit TransferErc721(action_cnt, chain_nonce, to, tokenId, msg.sender);
+		erc721_contract.safeTransferFrom(msg.sender, address(this), tokenId);
+	
+		emit TransferErc721(action_cnt, chain_nonce, msg.value, to, tokenId, address(erc721_contract));
 		action_cnt += 1;
-		return this.onERC721Received.selector;
+		tx_fees += msg.value;
 	}
 
 	// Transfer ETH to to Polka
-	function freeze(uint64 chain_nonce, string memory to) public whenNotPaused payable {
-		require(msg.value > 0, "value must be > 0!");
-		emit Transfer(action_cnt, chain_nonce, to, msg.value);
+	function freeze(uint64 chain_nonce, string memory to, uint256 value) public whenNotPaused payable {
+		require(msg.value > value, "must pay both value and transaction fees!");
+
+		emit Transfer(action_cnt, chain_nonce, msg.value - value, to, value);
 		action_cnt += 1;
+		tx_fees += msg.value - value;
 	}
 }
