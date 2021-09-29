@@ -204,7 +204,6 @@ contract Minter is Pausable {
 	function validate_remove_validator(uint128 action_id, address old_validator) public whenNotPaused {
 		require(threshold <= validators.length()-1, "update the threshold before removing this validator!");
 		require(validators.contains(old_validator), "given address is not a validator");
-		require(msg.sender != old_validator, "you can't remove yourself");
 
 		bytes memory action_data = abi.encodePacked(old_validator);
 		ValidationRes res = validate_action(action_id, Action.RemoveValidator, action_data);
