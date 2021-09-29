@@ -5,7 +5,8 @@ const { solidity } = require("ethereum-waffle");
 chai.use(solidity);
 const { expect } = chai;
 
-const TRANSFER_AMT = 100000000000000;
+const TRANSFER_AMT = ethers.BigNumber.from("10000000000000000");
+const TX_FEES = ethers.BigNumber.from("1000000000000");
 const ALICE_POLKA = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
 
 describe('Minter', () => {
@@ -95,11 +96,11 @@ describe('Minter', () => {
 		await validate_transfer(3232342, 1, addr3.address, TRANSFER_AMT);
 
 		const tx = await minter.connect(addr3)
-			.withdraw(1, ALICE_POLKA, TRANSFER_AMT);
+			.withdraw(1, ALICE_POLKA, TRANSFER_AMT, { value: TX_FEES });
 
 		await expect(tx)
 			.to.emit(minter, 'Unfreeze')
-			.withArgs(0, 1, ALICE_POLKA, TRANSFER_AMT)
+			.withArgs(0, 1, TX_FEES, ALICE_POLKA, TRANSFER_AMT)
 
 		await tx.wait();
 
@@ -121,11 +122,11 @@ describe('Minter', () => {
 		await validate_transfer_nft(323232, addr3.address, "test-nft");
 
 		const txw = await minter.connect(addr3)
-			.withdraw_nft(ALICE_POLKA, 0);
+			.withdraw_nft(ALICE_POLKA, 0, { value: TX_FEES });
 
 		await expect(txw)
 			.to.emit(minter, "UnfreezeNft")
-			.withArgs(0, ALICE_POLKA, "test-nft");
+			.withArgs(0, TX_FEES, ALICE_POLKA, "test-nft");
 
 		await txw.wait();
 
@@ -134,17 +135,17 @@ describe('Minter', () => {
 
 	it('transfer to foreign', async () => {
 		const tx = await minter.connect(addr3)
-			.freeze(1, ALICE_POLKA, { value: TRANSFER_AMT });
+			.freeze(1, ALICE_POLKA, TRANSFER_AMT, { value: TRANSFER_AMT.add(TX_FEES) });
 
 		await expect(tx)
 			.to.emit(minter, "Transfer")
-			.withArgs(0, 1, ALICE_POLKA, TRANSFER_AMT)
-			.to.changeEtherBalances([addr3, minter], [-TRANSFER_AMT, TRANSFER_AMT]);
+			.withArgs(0, 1, TX_FEES, ALICE_POLKA, TRANSFER_AMT)
+			.to.changeEtherBalances([addr3, minter], [`-${TRANSFER_AMT.add(TX_FEES).toString()}`, TRANSFER_AMT.add(TX_FEES)]);
 	});
-
+``
 	it('unfreeze eth', async () => {
 		const txf = await minter.connect(addr3)
-			.freeze(1, ALICE_POLKA, { value: TRANSFER_AMT });
+			.freeze(1, ALICE_POLKA, TRANSFER_AMT, { value: TRANSFER_AMT.add(TX_FEES) });
 
 		await txf.wait();
 
@@ -157,7 +158,7 @@ describe('Minter', () => {
 		});
 
 		await expect(txr)
-			.to.changeEtherBalances([minter, addr3], [-TRANSFER_AMT, TRANSFER_AMT]);
+			.to.changeEtherBalances([minter, addr3], [`-${TRANSFER_AMT.toString()}`, TRANSFER_AMT]);
 	});
 
 	const transfer_nft_foreign = async (own, token_id, chain_nonce, target) => {
@@ -166,15 +167,10 @@ describe('Minter', () => {
 		const txs = await erc721.connect(owner).setURI(token_id, "test-nft");
 		await txs.wait();
 
-		const calldata = Buffer.concat([
-			Buffer.from(new Int32Array([0]).buffer),
-			Buffer.from(new Int32Array([chain_nonce]).buffer).reverse(),
-			Buffer.from(target, "utf-8")
-		]);
+		const txa = await erc721.connect(own).approve(minter.address, token_id);
+		await txa.wait();
 
-
-		return await erc721.connect(own)
-		['safeTransferFrom(address,address,uint256,bytes)'](own.address, minter.address, token_id, calldata);
+		return await minter.connect(own).freeze_erc721(erc721.address, token_id, chain_nonce, target, { value: TX_FEES });
 	}
 
 	it('transfer nft to foreign', async () => {
@@ -182,20 +178,20 @@ describe('Minter', () => {
 
 		await expect(tx)
 			.to.emit(minter, "TransferErc721")
-			.withArgs(0, 1, ALICE_POLKA, 1, erc721.address);
+			.withArgs(0, 1, TX_FEES, ALICE_POLKA, 1, erc721.address);
 
 		await tx.wait();
 
 		const own = await erc721.ownerOf(1)
 		expect(own).to.equal(minter.address);
-	});
+	}).timeout(30000);
 
 	it('unfreeze nft from foreign', async () => {
 		const tx = await transfer_nft_foreign(addr3, 1, 1, ALICE_POLKA);
 
 		await tx.wait();
 
-		await validate_unfreeze_nft(1, addr3.address, 1, erc721.address);
+		await validate_unfreeze_nft(1, addr3.address, 1);
 
 		const own = await erc721.ownerOf(1);
 		expect(own).to.equal(addr3.address);
