@@ -4,7 +4,7 @@ pragma solidity ^0.8;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract UserNftMinter is ERC721URIStorage, Ownable {
+contract UserNftMinter is ERC721URIStorage {
     constructor() ERC721("UserNftMinter", "UMT") {}
 
     function mint(uint256 id, string calldata uri) public {
