@@ -1,0 +1,17 @@
+{
+  "name": "xpnet-web3-contracts",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" dist",
+    "build": "tsc -p tsconfig.json && yarn copy-dts"
+  },
+  "dependencies": {
+    "ethers": "^5.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^4",
+    "copyfiles": "^2"
+  }
+}
