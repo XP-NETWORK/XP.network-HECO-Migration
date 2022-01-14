@@ -2,51 +2,54 @@ import { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, Contra
 import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
-export interface XPNetInterface extends utils.Interface {
+export interface Erc1155MinterInterface extends utils.Interface {
     functions: {
         "balanceOf(address,uint256)": FunctionFragment;
         "balanceOfBatch(address[],uint256[])": FunctionFragment;
         "burn(address,uint256,uint256)": FunctionFragment;
+        "burnBatch(address,uint256[],uint256[])": FunctionFragment;
         "isApprovedForAll(address,address)": FunctionFragment;
-        "mint(address,uint256,uint256)": FunctionFragment;
+        "mintNft(address)": FunctionFragment;
         "owner()": FunctionFragment;
         "renounceOwnership()": FunctionFragment;
         "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)": FunctionFragment;
         "safeTransferFrom(address,address,uint256,uint256,bytes)": FunctionFragment;
         "setApprovalForAll(address,bool)": FunctionFragment;
         "supportsInterface(bytes4)": FunctionFragment;
+        "tokenId()": FunctionFragment;
         "transferOwnership(address)": FunctionFragment;
         "uri(uint256)": FunctionFragment;
-        "uris(uint256)": FunctionFragment;
     };
     encodeFunctionData(functionFragment: "balanceOf", values: [string, BigNumberish]): string;
     encodeFunctionData(functionFragment: "balanceOfBatch", values: [string[], BigNumberish[]]): string;
     encodeFunctionData(functionFragment: "burn", values: [string, BigNumberish, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "burnBatch", values: [string, BigNumberish[], BigNumberish[]]): string;
     encodeFunctionData(functionFragment: "isApprovedForAll", values: [string, string]): string;
-    encodeFunctionData(functionFragment: "mint", values: [string, BigNumberish, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "mintNft", values: [string]): string;
     encodeFunctionData(functionFragment: "owner", values?: undefined): string;
     encodeFunctionData(functionFragment: "renounceOwnership", values?: undefined): string;
     encodeFunctionData(functionFragment: "safeBatchTransferFrom", values: [string, string, BigNumberish[], BigNumberish[], BytesLike]): string;
     encodeFunctionData(functionFragment: "safeTransferFrom", values: [string, string, BigNumberish, BigNumberish, BytesLike]): string;
     encodeFunctionData(functionFragment: "setApprovalForAll", values: [string, boolean]): string;
     encodeFunctionData(functionFragment: "supportsInterface", values: [BytesLike]): string;
+    encodeFunctionData(functionFragment: "tokenId", values?: undefined): string;
     encodeFunctionData(functionFragment: "transferOwnership", values: [string]): string;
     encodeFunctionData(functionFragment: "uri", values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: "uris", values: [BigNumberish]): string;
     decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "balanceOfBatch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "burnBatch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "isApprovedForAll", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "mintNft", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "renounceOwnership", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "safeBatchTransferFrom", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "safeTransferFrom", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "setApprovalForAll", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "supportsInterface", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "tokenId", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "transferOwnership", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "uris", data: BytesLike): Result;
     events: {
         "ApprovalForAll(address,address,bool)": EventFragment;
         "OwnershipTransferred(address,address)": EventFragment;
@@ -114,11 +117,11 @@ export declare type URIEvent = TypedEvent<[
     id: BigNumber;
 }>;
 export declare type URIEventFilter = TypedEventFilter<URIEvent>;
-export interface XPNet extends BaseContract {
+export interface Erc1155Minter extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;
     deployed(): Promise<this>;
-    interface: XPNetInterface;
+    interface: Erc1155MinterInterface;
     queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
     listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
     listeners(eventName?: string): Array<Listener>;
@@ -131,11 +134,14 @@ export interface XPNet extends BaseContract {
     functions: {
         balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
         balanceOfBatch(accounts: string[], ids: BigNumberish[], overrides?: CallOverrides): Promise<[BigNumber[]]>;
-        burn(from: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+        burn(account: string, id: BigNumberish, value: BigNumberish, overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<ContractTransaction>;
+        burnBatch(account: string, ids: BigNumberish[], values: BigNumberish[], overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<[boolean]>;
-        mint(to: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+        mintNft(to: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
         owner(overrides?: CallOverrides): Promise<[string]>;
@@ -152,19 +158,22 @@ export interface XPNet extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
+        tokenId(overrides?: CallOverrides): Promise<[BigNumber]>;
         transferOwnership(newOwner: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
         uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
-        uris(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
     };
     balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
     balanceOfBatch(accounts: string[], ids: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber[]>;
-    burn(from: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+    burn(account: string, id: BigNumberish, value: BigNumberish, overrides?: Overrides & {
+        from?: string | Promise<string>;
+    }): Promise<ContractTransaction>;
+    burnBatch(account: string, ids: BigNumberish[], values: BigNumberish[], overrides?: Overrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
     isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
-    mint(to: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+    mintNft(to: string, overrides?: Overrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
     owner(overrides?: CallOverrides): Promise<string>;
@@ -181,26 +190,27 @@ export interface XPNet extends BaseContract {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
     supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+    tokenId(overrides?: CallOverrides): Promise<BigNumber>;
     transferOwnership(newOwner: string, overrides?: Overrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
     uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-    uris(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
     callStatic: {
         balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
         balanceOfBatch(accounts: string[], ids: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber[]>;
-        burn(from: string, id: BigNumberish, amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        burn(account: string, id: BigNumberish, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        burnBatch(account: string, ids: BigNumberish[], values: BigNumberish[], overrides?: CallOverrides): Promise<void>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
-        mint(to: string, id: BigNumberish, amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        mintNft(to: string, overrides?: CallOverrides): Promise<void>;
         owner(overrides?: CallOverrides): Promise<string>;
         renounceOwnership(overrides?: CallOverrides): Promise<void>;
         safeBatchTransferFrom(from: string, to: string, ids: BigNumberish[], amounts: BigNumberish[], data: BytesLike, overrides?: CallOverrides): Promise<void>;
         safeTransferFrom(from: string, to: string, id: BigNumberish, amount: BigNumberish, data: BytesLike, overrides?: CallOverrides): Promise<void>;
         setApprovalForAll(operator: string, approved: boolean, overrides?: CallOverrides): Promise<void>;
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+        tokenId(overrides?: CallOverrides): Promise<BigNumber>;
         transferOwnership(newOwner: string, overrides?: CallOverrides): Promise<void>;
         uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-        uris(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
     };
     filters: {
         "ApprovalForAll(address,address,bool)"(account?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
@@ -217,11 +227,14 @@ export interface XPNet extends BaseContract {
     estimateGas: {
         balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
         balanceOfBatch(accounts: string[], ids: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber>;
-        burn(from: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+        burn(account: string, id: BigNumberish, value: BigNumberish, overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<BigNumber>;
+        burnBatch(account: string, ids: BigNumberish[], values: BigNumberish[], overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<BigNumber>;
-        mint(to: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+        mintNft(to: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
         owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -238,20 +251,23 @@ export interface XPNet extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+        tokenId(overrides?: CallOverrides): Promise<BigNumber>;
         transferOwnership(newOwner: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
         uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-        uris(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
     };
     populateTransaction: {
         balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
         balanceOfBatch(accounts: string[], ids: BigNumberish[], overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        burn(from: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+        burn(account: string, id: BigNumberish, value: BigNumberish, overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<PopulatedTransaction>;
+        burnBatch(account: string, ids: BigNumberish[], values: BigNumberish[], overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        mint(to: string, id: BigNumberish, amount: BigNumberish, overrides?: Overrides & {
+        mintNft(to: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -268,10 +284,10 @@ export interface XPNet extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        tokenId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         transferOwnership(newOwner: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        uris(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
     };
 }
