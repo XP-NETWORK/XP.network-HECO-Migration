@@ -115,8 +115,8 @@ export interface MinterInterface extends utils.Interface {
         "TransferErc1155(uint256,uint64,uint256,string,uint256,address,string,string)": EventFragment;
         "TransferErc1155Batch(uint256,uint64,uint256,string,uint256[],address,string)": EventFragment;
         "TransferErc721(uint256,uint64,uint256,string,uint256,address,string,string)": EventFragment;
-        "UnfreezeNft(uint256,uint256,uint256,string,uint256,string)": EventFragment;
-        "UnfreezeNftBatch(uint256,uint256,uint256,string,uint256[],string)": EventFragment;
+        "UnfreezeNft(uint256,uint256,uint256,string,address,uint256,string)": EventFragment;
+        "UnfreezeNftBatch(uint256,uint256,uint256,string,address,uint256[],string)": EventFragment;
         "Unpaused(address)": EventFragment;
     };
     getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
@@ -194,6 +194,7 @@ export declare type UnfreezeNftEvent = TypedEvent<[
     BigNumber,
     BigNumber,
     string,
+    string,
     BigNumber,
     string
 ], {
@@ -201,6 +202,7 @@ export declare type UnfreezeNftEvent = TypedEvent<[
     chainNonce: BigNumber;
     txFees: BigNumber;
     to: string;
+    burner: string;
     tokenId: BigNumber;
     baseURI: string;
 }>;
@@ -210,6 +212,7 @@ export declare type UnfreezeNftBatchEvent = TypedEvent<[
     BigNumber,
     BigNumber,
     string,
+    string,
     BigNumber[],
     string
 ], {
@@ -217,6 +220,7 @@ export declare type UnfreezeNftBatchEvent = TypedEvent<[
     chainNonce: BigNumber;
     txFees: BigNumber;
     to: string;
+    burner: string;
     tokenIds: BigNumber[];
     baseURI: string;
 }>;
@@ -395,10 +399,10 @@ export interface Minter extends BaseContract {
         TransferErc1155Batch(actionId?: null, chainNonce?: null, txFees?: null, to?: null, ids?: null, contractAddr?: null, mintWith?: null): TransferErc1155BatchEventFilter;
         "TransferErc721(uint256,uint64,uint256,string,uint256,address,string,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc721EventFilter;
         TransferErc721(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc721EventFilter;
-        "UnfreezeNft(uint256,uint256,uint256,string,uint256,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, tokenId?: null, baseURI?: null): UnfreezeNftEventFilter;
-        UnfreezeNft(actionId?: null, chainNonce?: null, txFees?: null, to?: null, tokenId?: null, baseURI?: null): UnfreezeNftEventFilter;
-        "UnfreezeNftBatch(uint256,uint256,uint256,string,uint256[],string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, tokenIds?: null, baseURI?: null): UnfreezeNftBatchEventFilter;
-        UnfreezeNftBatch(actionId?: null, chainNonce?: null, txFees?: null, to?: null, tokenIds?: null, baseURI?: null): UnfreezeNftBatchEventFilter;
+        "UnfreezeNft(uint256,uint256,uint256,string,address,uint256,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenId?: null, baseURI?: null): UnfreezeNftEventFilter;
+        UnfreezeNft(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenId?: null, baseURI?: null): UnfreezeNftEventFilter;
+        "UnfreezeNftBatch(uint256,uint256,uint256,string,address,uint256[],string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenIds?: null, baseURI?: null): UnfreezeNftBatchEventFilter;
+        UnfreezeNftBatch(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenIds?: null, baseURI?: null): UnfreezeNftBatchEventFilter;
         "Unpaused(address)"(account?: null): UnpausedEventFilter;
         Unpaused(account?: null): UnpausedEventFilter;
     };
