@@ -23,6 +23,7 @@ export interface MinterInterface extends utils.Interface {
         "validateUnfreezeErc1155Batch(uint256,address,uint256[],address[],uint256,address)": FunctionFragment;
         "validateUnfreezeErc721(uint256,address,uint256,address,uint256,address)": FunctionFragment;
         "validateUnpauseBridge(uint256,uint256,address)": FunctionFragment;
+        "validateUpdateGroupKey(uint256,uint256,uint8,uint256,address)": FunctionFragment;
         "validateWhitelistNft(uint256,address,uint256,address)": FunctionFragment;
         "validatorPKX()": FunctionFragment;
         "validatorPKYParity()": FunctionFragment;
@@ -79,6 +80,7 @@ export interface MinterInterface extends utils.Interface {
     ]): string;
     encodeFunctionData(functionFragment: "validateUnfreezeErc721", values: [BigNumberish, string, BigNumberish, string, BigNumberish, string]): string;
     encodeFunctionData(functionFragment: "validateUnpauseBridge", values: [BigNumberish, BigNumberish, string]): string;
+    encodeFunctionData(functionFragment: "validateUpdateGroupKey", values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, string]): string;
     encodeFunctionData(functionFragment: "validateWhitelistNft", values: [BigNumberish, string, BigNumberish, string]): string;
     encodeFunctionData(functionFragment: "validatorPKX", values?: undefined): string;
     encodeFunctionData(functionFragment: "validatorPKYParity", values?: undefined): string;
@@ -104,6 +106,7 @@ export interface MinterInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "validateUnfreezeErc1155Batch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateUnfreezeErc721", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateUnpauseBridge", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateUpdateGroupKey", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateWhitelistNft", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validatorPKX", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validatorPKYParity", data: BytesLike): Result;
@@ -291,6 +294,9 @@ export interface Minter extends BaseContract {
         validateUnpauseBridge(actionId: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
+        validateUpdateGroupKey(actionId: BigNumberish, _validatorPKX: BigNumberish, _validatorPKYP: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<ContractTransaction>;
         validateWhitelistNft(actionId: BigNumberish, contractAddr: string, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
@@ -351,6 +357,9 @@ export interface Minter extends BaseContract {
     validateUnpauseBridge(actionId: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
+    validateUpdateGroupKey(actionId: BigNumberish, _validatorPKX: BigNumberish, _validatorPKYP: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
+        from?: string | Promise<string>;
+    }): Promise<ContractTransaction>;
     validateWhitelistNft(actionId: BigNumberish, contractAddr: string, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
@@ -383,6 +392,7 @@ export interface Minter extends BaseContract {
         validateUnfreezeErc1155Batch(actionId: BigNumberish, to: string, ids: BigNumberish[], contractAddrs: string[], sig: BigNumberish, proofAddr: string, overrides?: CallOverrides): Promise<void>;
         validateUnfreezeErc721(actionId: BigNumberish, to: string, tokenId: BigNumberish, contractAddr: string, sig: BigNumberish, proofAddr: string, overrides?: CallOverrides): Promise<void>;
         validateUnpauseBridge(actionId: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: CallOverrides): Promise<void>;
+        validateUpdateGroupKey(actionId: BigNumberish, _validatorPKX: BigNumberish, _validatorPKYP: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: CallOverrides): Promise<void>;
         validateWhitelistNft(actionId: BigNumberish, contractAddr: string, sig: BigNumberish, proofAddr: string, overrides?: CallOverrides): Promise<void>;
         validatorPKX(overrides?: CallOverrides): Promise<BigNumber>;
         validatorPKYParity(overrides?: CallOverrides): Promise<number>;
@@ -454,6 +464,9 @@ export interface Minter extends BaseContract {
         validateUnpauseBridge(actionId: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
+        validateUpdateGroupKey(actionId: BigNumberish, _validatorPKX: BigNumberish, _validatorPKYP: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<BigNumber>;
         validateWhitelistNft(actionId: BigNumberish, contractAddr: string, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
@@ -513,6 +526,9 @@ export interface Minter extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         validateUnpauseBridge(actionId: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<PopulatedTransaction>;
+        validateUpdateGroupKey(actionId: BigNumberish, _validatorPKX: BigNumberish, _validatorPKYP: BigNumberish, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         validateWhitelistNft(actionId: BigNumberish, contractAddr: string, sig: BigNumberish, proofAddr: string, overrides?: Overrides & {

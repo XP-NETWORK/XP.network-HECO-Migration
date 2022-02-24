@@ -9,6 +9,7 @@ export interface Erc1155MinterInterface extends utils.Interface {
         "burn(address,uint256,uint256)": FunctionFragment;
         "burnBatch(address,uint256[],uint256[])": FunctionFragment;
         "isApprovedForAll(address,address)": FunctionFragment;
+        "mintBatch(address,uint256[],uint256[])": FunctionFragment;
         "mintNft(address)": FunctionFragment;
         "owner()": FunctionFragment;
         "renounceOwnership()": FunctionFragment;
@@ -25,6 +26,7 @@ export interface Erc1155MinterInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "burn", values: [string, BigNumberish, BigNumberish]): string;
     encodeFunctionData(functionFragment: "burnBatch", values: [string, BigNumberish[], BigNumberish[]]): string;
     encodeFunctionData(functionFragment: "isApprovedForAll", values: [string, string]): string;
+    encodeFunctionData(functionFragment: "mintBatch", values: [string, BigNumberish[], BigNumberish[]]): string;
     encodeFunctionData(functionFragment: "mintNft", values: [string]): string;
     encodeFunctionData(functionFragment: "owner", values?: undefined): string;
     encodeFunctionData(functionFragment: "renounceOwnership", values?: undefined): string;
@@ -40,6 +42,7 @@ export interface Erc1155MinterInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "burnBatch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "isApprovedForAll", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "mintBatch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "mintNft", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "renounceOwnership", data: BytesLike): Result;
@@ -141,6 +144,9 @@ export interface Erc1155Minter extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<[boolean]>;
+        mintBatch(to: string, tokenIds: BigNumberish[], ones: BigNumberish[], overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<ContractTransaction>;
         mintNft(to: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
@@ -173,6 +179,9 @@ export interface Erc1155Minter extends BaseContract {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
     isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
+    mintBatch(to: string, tokenIds: BigNumberish[], ones: BigNumberish[], overrides?: Overrides & {
+        from?: string | Promise<string>;
+    }): Promise<ContractTransaction>;
     mintNft(to: string, overrides?: Overrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
@@ -201,6 +210,7 @@ export interface Erc1155Minter extends BaseContract {
         burn(account: string, id: BigNumberish, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
         burnBatch(account: string, ids: BigNumberish[], values: BigNumberish[], overrides?: CallOverrides): Promise<void>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
+        mintBatch(to: string, tokenIds: BigNumberish[], ones: BigNumberish[], overrides?: CallOverrides): Promise<void>;
         mintNft(to: string, overrides?: CallOverrides): Promise<void>;
         owner(overrides?: CallOverrides): Promise<string>;
         renounceOwnership(overrides?: CallOverrides): Promise<void>;
@@ -234,6 +244,9 @@ export interface Erc1155Minter extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<BigNumber>;
+        mintBatch(to: string, tokenIds: BigNumberish[], ones: BigNumberish[], overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<BigNumber>;
         mintNft(to: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
@@ -267,6 +280,9 @@ export interface Erc1155Minter extends BaseContract {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
         isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        mintBatch(to: string, tokenIds: BigNumberish[], ones: BigNumberish[], overrides?: Overrides & {
+            from?: string | Promise<string>;
+        }): Promise<PopulatedTransaction>;
         mintNft(to: string, overrides?: Overrides & {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
