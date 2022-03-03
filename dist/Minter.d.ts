@@ -6,6 +6,7 @@ export interface MinterInterface extends utils.Interface {
     functions: {
         "HALF_Q()": FunctionFragment;
         "Q()": FunctionFragment;
+        "actionCnt()": FunctionFragment;
         "freezeErc1155(address,uint256,uint64,string,string)": FunctionFragment;
         "freezeErc1155Batch(address,uint256[],uint256[],uint64,string,string)": FunctionFragment;
         "freezeErc721(address,uint256,uint64,string,string)": FunctionFragment;
@@ -33,6 +34,7 @@ export interface MinterInterface extends utils.Interface {
     };
     encodeFunctionData(functionFragment: "HALF_Q", values?: undefined): string;
     encodeFunctionData(functionFragment: "Q", values?: undefined): string;
+    encodeFunctionData(functionFragment: "actionCnt", values?: undefined): string;
     encodeFunctionData(functionFragment: "freezeErc1155", values: [string, BigNumberish, BigNumberish, string, string]): string;
     encodeFunctionData(functionFragment: "freezeErc1155Batch", values: [
         string,
@@ -89,6 +91,7 @@ export interface MinterInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "withdrawNftBatch", values: [string, BigNumberish, BigNumberish[], BigNumberish[], string]): string;
     decodeFunctionResult(functionFragment: "HALF_Q", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "Q", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "actionCnt", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "freezeErc1155", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "freezeErc1155Batch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "freezeErc721", data: BytesLike): Result;
@@ -249,6 +252,7 @@ export interface Minter extends BaseContract {
     functions: {
         HALF_Q(overrides?: CallOverrides): Promise<[BigNumber]>;
         Q(overrides?: CallOverrides): Promise<[BigNumber]>;
+        actionCnt(overrides?: CallOverrides): Promise<[BigNumber]>;
         freezeErc1155(erc1155Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, mintWith: string, overrides?: PayableOverrides & {
             from?: string | Promise<string>;
         }): Promise<ContractTransaction>;
@@ -312,6 +316,7 @@ export interface Minter extends BaseContract {
     };
     HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
     Q(overrides?: CallOverrides): Promise<BigNumber>;
+    actionCnt(overrides?: CallOverrides): Promise<BigNumber>;
     freezeErc1155(erc1155Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, mintWith: string, overrides?: PayableOverrides & {
         from?: string | Promise<string>;
     }): Promise<ContractTransaction>;
@@ -375,6 +380,7 @@ export interface Minter extends BaseContract {
     callStatic: {
         HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
         Q(overrides?: CallOverrides): Promise<BigNumber>;
+        actionCnt(overrides?: CallOverrides): Promise<BigNumber>;
         freezeErc1155(erc1155Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, mintWith: string, overrides?: CallOverrides): Promise<void>;
         freezeErc1155Batch(erc1155Contract: string, tokenIds: BigNumberish[], ones: BigNumberish[], chainNonce: BigNumberish, to: string, mintWith: string, overrides?: CallOverrides): Promise<void>;
         freezeErc721(erc721Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, mintWith: string, overrides?: CallOverrides): Promise<void>;
@@ -419,6 +425,7 @@ export interface Minter extends BaseContract {
     estimateGas: {
         HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
         Q(overrides?: CallOverrides): Promise<BigNumber>;
+        actionCnt(overrides?: CallOverrides): Promise<BigNumber>;
         freezeErc1155(erc1155Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, mintWith: string, overrides?: PayableOverrides & {
             from?: string | Promise<string>;
         }): Promise<BigNumber>;
@@ -483,6 +490,7 @@ export interface Minter extends BaseContract {
     populateTransaction: {
         HALF_Q(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         Q(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        actionCnt(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         freezeErc1155(erc1155Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, mintWith: string, overrides?: PayableOverrides & {
             from?: string | Promise<string>;
         }): Promise<PopulatedTransaction>;
