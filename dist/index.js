@@ -81,7 +81,7 @@ Object.defineProperty(exports, "XPNft1155__factory", {
         return XPNft1155__factory_1.XPNft1155__factory;
     },
 });
-var UserNFTStore__factory_1 = require("./factories/UserStore.sol/UserNFTStore__factory");
+var UserNFTStore__factory_1 = require("./factories/UserStore.sol");
 Object.defineProperty(exports, "UserNFTStore__factory", {
     enumerable: true,
     get: function () {
