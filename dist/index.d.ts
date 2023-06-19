@@ -9,6 +9,7 @@ export type { UserNftMinter } from "./UserNftMinter";
 export type { XPNft } from "./XPNft";
 export type { XPNft1155 } from "./XPNft1155";
 export type { UserNFTStore } from "./UserStore.sol/UserNFTStore";
+export type { UserNFTStore as UserNFTStore721 } from "./UserNFTStore721.sol";
 export { BridgeNFT__factory } from "./factories/BridgeNFT__factory";
 export { BridgeNFTBatch__factory } from "./factories/BridgeNFTBatch__factory";
 export { Erc1155Minter__factory } from "./factories/Erc1155Minter__factory";
