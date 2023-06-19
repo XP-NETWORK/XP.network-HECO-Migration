@@ -20,3 +20,4 @@ export { UserNftMinter__factory } from "./factories/UserNftMinter__factory";
 export { XPNft__factory } from "./factories/XPNft__factory";
 export { XPNft1155__factory } from "./factories/XPNft1155__factory";
 export { UserNFTStore__factory } from "./factories/UserStore.sol/UserNFTStore__factory";
+export { UserNFTStore__factory as UserNFTStore721__factory } from "./factories/UserNFTStore721.sol/UserNFTStore__factory";

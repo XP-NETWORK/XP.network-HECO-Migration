@@ -88,4 +88,12 @@ Object.defineProperty(exports, "UserNFTStore__factory", {
         return UserNFTStore__factory_1.UserNFTStore__factory;
     },
 });
+
+var UserNFTStore721__factory_1 = require("./factories/UserNFTStore721.sol");
+Object.defineProperty(exports, "UserNFTStore721__factory", {
+    enumerable: true,
+    get: function () {
+        return UserNFTStore721__factory_1.UserNFTStore__factory;
+    },
+});
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBY0EscUVBQW9FO0FBQTNELHdIQUFBLGtCQUFrQixPQUFBO0FBQzNCLCtFQUE4RTtBQUFyRSxrSUFBQSx1QkFBdUIsT0FBQTtBQUNoQyw2RUFBNEU7QUFBbkUsZ0lBQUEsc0JBQXNCLE9BQUE7QUFDL0IsK0RBQThEO0FBQXJELGtIQUFBLGVBQWUsT0FBQTtBQUN4Qix5RUFBd0U7QUFBL0QsNEhBQUEsb0JBQW9CLE9BQUE7QUFDN0IsMkVBQTBFO0FBQWpFLDhIQUFBLHFCQUFxQixPQUFBO0FBQzlCLG1GQUFrRjtBQUF6RSxzSUFBQSx5QkFBeUIsT0FBQTtBQUNsQyw2RUFBNEU7QUFBbkUsZ0lBQUEsc0JBQXNCLE9BQUE7QUFDL0IsNkRBQTREO0FBQW5ELGdIQUFBLGNBQWMsT0FBQTtBQUN2QixxRUFBb0U7QUFBM0Qsd0hBQUEsa0JBQWtCLE9BQUEifQ==
