@@ -1,16 +1,21 @@
-import { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
-import { FunctionFragment, Result } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "./common";
 export interface BridgeNFTInterface extends utils.Interface {
     functions: {
         "baseURI()": FunctionFragment;
         "burnFor(address,uint256)": FunctionFragment;
         "mint(address,uint256,bytes)": FunctionFragment;
     };
+    getFunction(nameOrSignatureOrTopic: "baseURI" | "burnFor" | "mint"): FunctionFragment;
     encodeFunctionData(functionFragment: "baseURI", values?: undefined): string;
-    encodeFunctionData(functionFragment: "burnFor", values: [string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "mint", values: [string, BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "burnFor", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
+    encodeFunctionData(functionFragment: "mint", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BytesLike>
+    ]): string;
     decodeFunctionResult(functionFragment: "baseURI", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "burnFor", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
@@ -32,50 +37,50 @@ export interface BridgeNFT extends BaseContract {
     removeListener: OnEvent<this>;
     functions: {
         baseURI(overrides?: Overrides & {
-            from?: string | Promise<string>;
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
     };
     baseURI(overrides?: Overrides & {
-        from?: string | Promise<string>;
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     callStatic: {
         baseURI(overrides?: CallOverrides): Promise<string>;
-        burnFor(to: string, id: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: CallOverrides): Promise<void>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {};
     estimateGas: {
         baseURI(overrides?: Overrides & {
-            from?: string | Promise<string>;
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
     };
     populateTransaction: {
         baseURI(overrides?: Overrides & {
-            from?: string | Promise<string>;
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
     };
 }

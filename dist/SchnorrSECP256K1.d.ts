@@ -1,16 +1,23 @@
-import { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, PopulatedTransaction, Signer, utils } from "ethers";
-import { FunctionFragment, Result } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "./common";
 export interface SchnorrSECP256K1Interface extends utils.Interface {
     functions: {
         "HALF_Q()": FunctionFragment;
         "Q()": FunctionFragment;
         "verifySignature(uint256,uint8,uint256,uint256,address)": FunctionFragment;
     };
+    getFunction(nameOrSignatureOrTopic: "HALF_Q" | "Q" | "verifySignature"): FunctionFragment;
     encodeFunctionData(functionFragment: "HALF_Q", values?: undefined): string;
     encodeFunctionData(functionFragment: "Q", values?: undefined): string;
-    encodeFunctionData(functionFragment: "verifySignature", values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, string]): string;
+    encodeFunctionData(functionFragment: "verifySignature", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
     decodeFunctionResult(functionFragment: "HALF_Q", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "Q", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "verifySignature", data: BytesLike): Result;
@@ -33,25 +40,25 @@ export interface SchnorrSECP256K1 extends BaseContract {
     functions: {
         HALF_Q(overrides?: CallOverrides): Promise<[BigNumber]>;
         Q(overrides?: CallOverrides): Promise<[BigNumber]>;
-        verifySignature(signingPubKeyX: BigNumberish, pubKeyYParity: BigNumberish, signature: BigNumberish, msgHash: BigNumberish, nonceTimesGeneratorAddress: string, overrides?: CallOverrides): Promise<[boolean]>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[boolean]>;
     };
     HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
     Q(overrides?: CallOverrides): Promise<BigNumber>;
-    verifySignature(signingPubKeyX: BigNumberish, pubKeyYParity: BigNumberish, signature: BigNumberish, msgHash: BigNumberish, nonceTimesGeneratorAddress: string, overrides?: CallOverrides): Promise<boolean>;
+    verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
     callStatic: {
         HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
         Q(overrides?: CallOverrides): Promise<BigNumber>;
-        verifySignature(signingPubKeyX: BigNumberish, pubKeyYParity: BigNumberish, signature: BigNumberish, msgHash: BigNumberish, nonceTimesGeneratorAddress: string, overrides?: CallOverrides): Promise<boolean>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
     };
     filters: {};
     estimateGas: {
         HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
         Q(overrides?: CallOverrides): Promise<BigNumber>;
-        verifySignature(signingPubKeyX: BigNumberish, pubKeyYParity: BigNumberish, signature: BigNumberish, msgHash: BigNumberish, nonceTimesGeneratorAddress: string, overrides?: CallOverrides): Promise<BigNumber>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
     };
     populateTransaction: {
         HALF_Q(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         Q(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        verifySignature(signingPubKeyX: BigNumberish, pubKeyYParity: BigNumberish, signature: BigNumberish, msgHash: BigNumberish, nonceTimesGeneratorAddress: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
     };
 }
