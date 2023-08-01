@@ -1,147 +1,331 @@
-import { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PayableOverrides, PopulatedTransaction, Signer, utils } from "ethers";
-import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PayableOverrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "./common";
 export interface MinterInterface extends utils.Interface {
     functions: {
-        "freeze(uint64,string,uint256)": FunctionFragment;
-        "freezeErc721(address,uint256,uint64,string)": FunctionFragment;
+        "HALF_Q()": FunctionFragment;
+        "Q()": FunctionFragment;
+        "actionCnt()": FunctionFragment;
+        "freezeErc1155(address,uint256,uint64,string,string)": FunctionFragment;
+        "freezeErc1155Batch(address,uint256[],uint256[],uint64,string,string)": FunctionFragment;
+        "freezeErc721(address,uint256,uint64,string,string)": FunctionFragment;
+        "nftWhitelist(address)": FunctionFragment;
+        "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": FunctionFragment;
+        "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
         "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
         "paused()": FunctionFragment;
-        "validateAddValidator(uint128,address)": FunctionFragment;
-        "validatePauseBridge(uint128)": FunctionFragment;
-        "validateRemoveValidator(uint128,address)": FunctionFragment;
-        "validateSetThreshold(uint128,uint16)": FunctionFragment;
-        "validateTransfer(uint128,uint64,address,uint256)": FunctionFragment;
-        "validateTransferNft(uint128,address,string)": FunctionFragment;
-        "validateUnfreeze(uint128,address,uint256)": FunctionFragment;
-        "validateUnfreezeNft(uint128,address,uint256,address)": FunctionFragment;
-        "validateUnpauseBridge(uint128)": FunctionFragment;
-        "validateWhitelistNft(uint128,address)": FunctionFragment;
-        "validateWithdrawFees(uint128)": FunctionFragment;
-        "withdraw(uint64,string,uint256)": FunctionFragment;
-        "withdrawNft(string,uint256)": FunctionFragment;
+        "supportsInterface(bytes4)": FunctionFragment;
+        "validatePauseBridge(uint256,uint256,address)": FunctionFragment;
+        "validateTransferFees(uint256,address,uint256,address)": FunctionFragment;
+        "validateTransferNft(uint256,address,uint256,address,bytes,uint256,address)": FunctionFragment;
+        "validateTransferNftBatch(uint256,address,uint256[],address[],bytes,uint256,address)": FunctionFragment;
+        "validateUnfreezeErc1155(uint256,address,uint256,address,uint256,address)": FunctionFragment;
+        "validateUnfreezeErc1155Batch(uint256,address,uint256[],address[],uint256,address)": FunctionFragment;
+        "validateUnfreezeErc721(uint256,address,uint256,address,uint256,address)": FunctionFragment;
+        "validateUnpauseBridge(uint256,uint256,address)": FunctionFragment;
+        "validateUpdateGroupKey(uint256,uint256,uint8,uint256,address)": FunctionFragment;
+        "validateWhitelistNft(uint256,address,uint256,address)": FunctionFragment;
+        "validatorPKX()": FunctionFragment;
+        "validatorPKYParity()": FunctionFragment;
+        "verifySignature(uint256,uint8,uint256,uint256,address)": FunctionFragment;
+        "withdrawNft(string,uint64,uint256,address)": FunctionFragment;
+        "withdrawNftBatch(string,uint64,uint256[],uint256[],address)": FunctionFragment;
     };
-    encodeFunctionData(functionFragment: "freeze", values: [BigNumberish, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "freezeErc721", values: [string, BigNumberish, BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: "onERC721Received", values: [string, string, BigNumberish, BytesLike]): string;
+    getFunction(nameOrSignatureOrTopic: "HALF_Q" | "Q" | "actionCnt" | "freezeErc1155" | "freezeErc1155Batch" | "freezeErc721" | "nftWhitelist" | "onERC1155BatchReceived" | "onERC1155Received" | "onERC721Received" | "paused" | "supportsInterface" | "validatePauseBridge" | "validateTransferFees" | "validateTransferNft" | "validateTransferNftBatch" | "validateUnfreezeErc1155" | "validateUnfreezeErc1155Batch" | "validateUnfreezeErc721" | "validateUnpauseBridge" | "validateUpdateGroupKey" | "validateWhitelistNft" | "validatorPKX" | "validatorPKYParity" | "verifySignature" | "withdrawNft" | "withdrawNftBatch"): FunctionFragment;
+    encodeFunctionData(functionFragment: "HALF_Q", values?: undefined): string;
+    encodeFunctionData(functionFragment: "Q", values?: undefined): string;
+    encodeFunctionData(functionFragment: "actionCnt", values?: undefined): string;
+    encodeFunctionData(functionFragment: "freezeErc1155", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "freezeErc1155Batch", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "freezeErc721", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "nftWhitelist", values: [PromiseOrValue<string>]): string;
+    encodeFunctionData(functionFragment: "onERC1155BatchReceived", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BytesLike>
+    ]): string;
+    encodeFunctionData(functionFragment: "onERC1155Received", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BytesLike>
+    ]): string;
+    encodeFunctionData(functionFragment: "onERC721Received", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BytesLike>
+    ]): string;
     encodeFunctionData(functionFragment: "paused", values?: undefined): string;
-    encodeFunctionData(functionFragment: "validateAddValidator", values: [BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: "validatePauseBridge", values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: "validateRemoveValidator", values: [BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: "validateSetThreshold", values: [BigNumberish, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "validateTransfer", values: [BigNumberish, BigNumberish, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "validateTransferNft", values: [BigNumberish, string, string]): string;
-    encodeFunctionData(functionFragment: "validateUnfreeze", values: [BigNumberish, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "validateUnfreezeNft", values: [BigNumberish, string, BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: "validateUnpauseBridge", values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: "validateWhitelistNft", values: [BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: "validateWithdrawFees", values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: "withdraw", values: [BigNumberish, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "withdrawNft", values: [string, BigNumberish]): string;
-    decodeFunctionResult(functionFragment: "freeze", data: BytesLike): Result;
+    encodeFunctionData(functionFragment: "supportsInterface", values: [PromiseOrValue<BytesLike>]): string;
+    encodeFunctionData(functionFragment: "validatePauseBridge", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateTransferFees", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateTransferNft", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BytesLike>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateTransferNftBatch", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<string>[],
+        PromiseOrValue<BytesLike>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateUnfreezeErc1155", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateUnfreezeErc1155Batch", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<string>[],
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateUnfreezeErc721", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateUnpauseBridge", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateUpdateGroupKey", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validateWhitelistNft", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "validatorPKX", values?: undefined): string;
+    encodeFunctionData(functionFragment: "validatorPKYParity", values?: undefined): string;
+    encodeFunctionData(functionFragment: "verifySignature", values: [
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "withdrawNft", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<string>
+    ]): string;
+    encodeFunctionData(functionFragment: "withdrawNftBatch", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<string>
+    ]): string;
+    decodeFunctionResult(functionFragment: "HALF_Q", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "Q", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "actionCnt", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "freezeErc1155", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "freezeErc1155Batch", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "freezeErc721", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "nftWhitelist", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "onERC1155BatchReceived", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "onERC1155Received", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "onERC721Received", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateAddValidator", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "supportsInterface", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validatePauseBridge", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateRemoveValidator", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateSetThreshold", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateTransfer", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateTransferFees", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateTransferNft", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateUnfreeze", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateUnfreezeNft", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateTransferNftBatch", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateUnfreezeErc1155", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateUnfreezeErc1155Batch", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateUnfreezeErc721", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateUnpauseBridge", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validateUpdateGroupKey", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateWhitelistNft", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "validateWithdrawFees", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validatorPKX", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "validatorPKYParity", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "verifySignature", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "withdrawNft", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "withdrawNftBatch", data: BytesLike): Result;
     events: {
         "Paused(address)": EventFragment;
-        "QuorumFailure(uint256)": EventFragment;
-        "Transfer(uint256,uint64,uint256,string,uint256)": EventFragment;
-        "TransferErc721(uint256,uint64,uint256,string,uint256,address)": EventFragment;
-        "Unfreeze(uint256,uint64,uint256,string,uint256)": EventFragment;
-        "UnfreezeNft(uint256,uint256,string,string)": EventFragment;
+        "TransferErc1155(uint256,uint64,uint256,string,uint256,address,string,string)": EventFragment;
+        "TransferErc1155Batch(uint256,uint64,uint256,string,uint256[],address,string)": EventFragment;
+        "TransferErc721(uint256,uint64,uint256,string,uint256,address,string,string)": EventFragment;
+        "UnfreezeNft(uint256,uint256,uint256,string,address,uint256,string)": EventFragment;
+        "UnfreezeNftBatch(uint256,uint256,uint256,string,address,uint256[],string)": EventFragment;
         "Unpaused(address)": EventFragment;
     };
     getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
-    getEvent(nameOrSignatureOrTopic: "QuorumFailure"): EventFragment;
-    getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "TransferErc1155"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "TransferErc1155Batch"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "TransferErc721"): EventFragment;
-    getEvent(nameOrSignatureOrTopic: "Unfreeze"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "UnfreezeNft"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "UnfreezeNftBatch"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
 }
-export declare type PausedEvent = TypedEvent<[string], {
+export interface PausedEventObject {
     account: string;
-}>;
+}
+export declare type PausedEvent = TypedEvent<[string], PausedEventObject>;
 export declare type PausedEventFilter = TypedEventFilter<PausedEvent>;
-export declare type QuorumFailureEvent = TypedEvent<[
-    BigNumber
-], {
-    actionId: BigNumber;
-}>;
-export declare type QuorumFailureEventFilter = TypedEventFilter<QuorumFailureEvent>;
-export declare type TransferEvent = TypedEvent<[
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string,
-    BigNumber
-], {
-    actionId: BigNumber;
-    chainNonce: BigNumber;
-    txFees: BigNumber;
-    to: string;
-    value: BigNumber;
-}>;
-export declare type TransferEventFilter = TypedEventFilter<TransferEvent>;
-export declare type TransferErc721Event = TypedEvent<[
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string,
-    BigNumber,
-    string
-], {
+export interface TransferErc1155EventObject {
     actionId: BigNumber;
     chainNonce: BigNumber;
     txFees: BigNumber;
     to: string;
     id: BigNumber;
     contractAddr: string;
-}>;
-export declare type TransferErc721EventFilter = TypedEventFilter<TransferErc721Event>;
-export declare type UnfreezeEvent = TypedEvent<[
+    tokenData: string;
+    mintWith: string;
+}
+export declare type TransferErc1155Event = TypedEvent<[
     BigNumber,
     BigNumber,
     BigNumber,
     string,
-    BigNumber
-], {
+    BigNumber,
+    string,
+    string,
+    string
+], TransferErc1155EventObject>;
+export declare type TransferErc1155EventFilter = TypedEventFilter<TransferErc1155Event>;
+export interface TransferErc1155BatchEventObject {
     actionId: BigNumber;
     chainNonce: BigNumber;
     txFees: BigNumber;
     to: string;
-    value: BigNumber;
-}>;
-export declare type UnfreezeEventFilter = TypedEventFilter<UnfreezeEvent>;
-export declare type UnfreezeNftEvent = TypedEvent<[
+    ids: BigNumber[];
+    contractAddr: string;
+    mintWith: string;
+}
+export declare type TransferErc1155BatchEvent = TypedEvent<[
+    BigNumber,
     BigNumber,
     BigNumber,
     string,
+    BigNumber[],
+    string,
     string
-], {
+], TransferErc1155BatchEventObject>;
+export declare type TransferErc1155BatchEventFilter = TypedEventFilter<TransferErc1155BatchEvent>;
+export interface TransferErc721EventObject {
     actionId: BigNumber;
+    chainNonce: BigNumber;
     txFees: BigNumber;
     to: string;
-    data: string;
-}>;
+    id: BigNumber;
+    contractAddr: string;
+    tokenData: string;
+    mintWith: string;
+}
+export declare type TransferErc721Event = TypedEvent<[
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string,
+    BigNumber,
+    string,
+    string,
+    string
+], TransferErc721EventObject>;
+export declare type TransferErc721EventFilter = TypedEventFilter<TransferErc721Event>;
+export interface UnfreezeNftEventObject {
+    actionId: BigNumber;
+    chainNonce: BigNumber;
+    txFees: BigNumber;
+    to: string;
+    burner: string;
+    tokenId: BigNumber;
+    baseURI: string;
+}
+export declare type UnfreezeNftEvent = TypedEvent<[
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string,
+    string,
+    BigNumber,
+    string
+], UnfreezeNftEventObject>;
 export declare type UnfreezeNftEventFilter = TypedEventFilter<UnfreezeNftEvent>;
-export declare type UnpausedEvent = TypedEvent<[string], {
+export interface UnfreezeNftBatchEventObject {
+    actionId: BigNumber;
+    chainNonce: BigNumber;
+    txFees: BigNumber;
+    to: string;
+    burner: string;
+    tokenIds: BigNumber[];
+    baseURI: string;
+}
+export declare type UnfreezeNftBatchEvent = TypedEvent<[
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string,
+    string,
+    BigNumber[],
+    string
+], UnfreezeNftBatchEventObject>;
+export declare type UnfreezeNftBatchEventFilter = TypedEventFilter<UnfreezeNftBatchEvent>;
+export interface UnpausedEventObject {
     account: string;
-}>;
+}
+export declare type UnpausedEvent = TypedEvent<[string], UnpausedEventObject>;
 export declare type UnpausedEventFilter = TypedEventFilter<UnpausedEvent>;
 export interface Minter extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
@@ -158,240 +342,306 @@ export interface Minter extends BaseContract {
     once: OnEvent<this>;
     removeListener: OnEvent<this>;
     functions: {
-        freeze(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        HALF_Q(overrides?: CallOverrides): Promise<[BigNumber]>;
+        Q(overrides?: CallOverrides): Promise<[BigNumber]>;
+        actionCnt(overrides?: CallOverrides): Promise<[BigNumber]>;
+        freezeErc1155(erc1155Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        freezeErc721(erc721Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        freezeErc1155Batch(erc1155Contract: PromiseOrValue<string>, tokenIds: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        onERC721Received(arg0: string, arg1: string, arg2: BigNumberish, arg3: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<ContractTransaction>;
+        nftWhitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[boolean]>;
+        onERC1155BatchReceived(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>[], arg3: PromiseOrValue<BigNumberish>[], arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<ContractTransaction>;
+        onERC1155Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BigNumberish>, arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<ContractTransaction>;
+        onERC721Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
         paused(overrides?: CallOverrides): Promise<[boolean]>;
-        validateAddValidator(actionId: BigNumberish, newValidator: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<[boolean]>;
+        validatePauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validatePauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferFees(actionId: PromiseOrValue<BigNumberish>, receiver: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateRemoveValidator(actionId: BigNumberish, oldValidator: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferNft(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, nftId: PromiseOrValue<BigNumberish>, mintWith: PromiseOrValue<string>, mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateSetThreshold(actionId: BigNumberish, newThreshold: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferNftBatch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], mintWith: PromiseOrValue<string>[], mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateTransfer(actionId: BigNumberish, chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc1155(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateTransferNft(actionId: BigNumberish, to: string, data: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc1155Batch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], contractAddrs: PromiseOrValue<string>[], sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateUnfreeze(actionId: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc721(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateUnfreezeNft(actionId: BigNumberish, to: string, tokenId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnpauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateUnpauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUpdateGroupKey(actionId: PromiseOrValue<BigNumberish>, _validatorPKX: PromiseOrValue<BigNumberish>, _validatorPKYP: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateWhitelistNft(actionId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateWhitelistNft(actionId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        validateWithdrawFees(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validatorPKX(overrides?: CallOverrides): Promise<[BigNumber]>;
+        validatorPKYParity(overrides?: CallOverrides): Promise<[number]>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[boolean]>;
+        withdrawNft(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, id: PromiseOrValue<BigNumberish>, burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        withdraw(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
-        }): Promise<ContractTransaction>;
-        withdrawNft(to: string, id: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        withdrawNftBatch(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, ids: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
     };
-    freeze(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-        from?: string | Promise<string>;
+    HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
+    Q(overrides?: CallOverrides): Promise<BigNumber>;
+    actionCnt(overrides?: CallOverrides): Promise<BigNumber>;
+    freezeErc1155(erc1155Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    freezeErc721(erc721Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, overrides?: PayableOverrides & {
-        from?: string | Promise<string>;
+    freezeErc1155Batch(erc1155Contract: PromiseOrValue<string>, tokenIds: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    onERC721Received(arg0: string, arg1: string, arg2: BigNumberish, arg3: BytesLike, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+        from?: PromiseOrValue<string>;
+    }): Promise<ContractTransaction>;
+    nftWhitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
+    onERC1155BatchReceived(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>[], arg3: PromiseOrValue<BigNumberish>[], arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
+    }): Promise<ContractTransaction>;
+    onERC1155Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BigNumberish>, arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
+    }): Promise<ContractTransaction>;
+    onERC721Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     paused(overrides?: CallOverrides): Promise<boolean>;
-    validateAddValidator(actionId: BigNumberish, newValidator: string, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<boolean>;
+    validatePauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validatePauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateTransferFees(actionId: PromiseOrValue<BigNumberish>, receiver: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateRemoveValidator(actionId: BigNumberish, oldValidator: string, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateTransferNft(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, nftId: PromiseOrValue<BigNumberish>, mintWith: PromiseOrValue<string>, mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateSetThreshold(actionId: BigNumberish, newThreshold: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateTransferNftBatch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], mintWith: PromiseOrValue<string>[], mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateTransfer(actionId: BigNumberish, chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateUnfreezeErc1155(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateTransferNft(actionId: BigNumberish, to: string, data: string, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateUnfreezeErc1155Batch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], contractAddrs: PromiseOrValue<string>[], sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateUnfreeze(actionId: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateUnfreezeErc721(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateUnfreezeNft(actionId: BigNumberish, to: string, tokenId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateUnpauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateUnpauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateUpdateGroupKey(actionId: PromiseOrValue<BigNumberish>, _validatorPKX: PromiseOrValue<BigNumberish>, _validatorPKYP: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateWhitelistNft(actionId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validateWhitelistNft(actionId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    validateWithdrawFees(actionId: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    validatorPKX(overrides?: CallOverrides): Promise<BigNumber>;
+    validatorPKYParity(overrides?: CallOverrides): Promise<number>;
+    verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
+    withdrawNft(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, id: PromiseOrValue<BigNumberish>, burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    withdraw(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-        from?: string | Promise<string>;
-    }): Promise<ContractTransaction>;
-    withdrawNft(to: string, id: BigNumberish, overrides?: PayableOverrides & {
-        from?: string | Promise<string>;
+    withdrawNftBatch(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, ids: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     callStatic: {
-        freeze(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        freezeErc721(erc721Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, overrides?: CallOverrides): Promise<void>;
-        onERC721Received(arg0: string, arg1: string, arg2: BigNumberish, arg3: BytesLike, overrides?: CallOverrides): Promise<string>;
+        HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
+        Q(overrides?: CallOverrides): Promise<BigNumber>;
+        actionCnt(overrides?: CallOverrides): Promise<BigNumber>;
+        freezeErc1155(erc1155Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        freezeErc1155Batch(erc1155Contract: PromiseOrValue<string>, tokenIds: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        nftWhitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
+        onERC1155BatchReceived(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>[], arg3: PromiseOrValue<BigNumberish>[], arg4: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
+        onERC1155Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BigNumberish>, arg4: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
+        onERC721Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
         paused(overrides?: CallOverrides): Promise<boolean>;
-        validateAddValidator(actionId: BigNumberish, newValidator: string, overrides?: CallOverrides): Promise<void>;
-        validatePauseBridge(actionId: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        validateRemoveValidator(actionId: BigNumberish, oldValidator: string, overrides?: CallOverrides): Promise<void>;
-        validateSetThreshold(actionId: BigNumberish, newThreshold: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        validateTransfer(actionId: BigNumberish, chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        validateTransferNft(actionId: BigNumberish, to: string, data: string, overrides?: CallOverrides): Promise<BigNumber>;
-        validateUnfreeze(actionId: BigNumberish, to: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        validateUnfreezeNft(actionId: BigNumberish, to: string, tokenId: BigNumberish, contractAddr: string, overrides?: CallOverrides): Promise<void>;
-        validateUnpauseBridge(actionId: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        validateWhitelistNft(actionId: BigNumberish, contractAddr: string, overrides?: CallOverrides): Promise<void>;
-        validateWithdrawFees(actionId: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        withdraw(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        withdrawNft(to: string, id: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<boolean>;
+        validatePauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateTransferFees(actionId: PromiseOrValue<BigNumberish>, receiver: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateTransferNft(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, nftId: PromiseOrValue<BigNumberish>, mintWith: PromiseOrValue<string>, mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateTransferNftBatch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], mintWith: PromiseOrValue<string>[], mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateUnfreezeErc1155(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateUnfreezeErc1155Batch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], contractAddrs: PromiseOrValue<string>[], sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateUnfreezeErc721(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateUnpauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateUpdateGroupKey(actionId: PromiseOrValue<BigNumberish>, _validatorPKX: PromiseOrValue<BigNumberish>, _validatorPKYP: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validateWhitelistNft(actionId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        validatorPKX(overrides?: CallOverrides): Promise<BigNumber>;
+        validatorPKYParity(overrides?: CallOverrides): Promise<number>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
+        withdrawNft(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, id: PromiseOrValue<BigNumberish>, burner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        withdrawNftBatch(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, ids: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], burner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {
         "Paused(address)"(account?: null): PausedEventFilter;
         Paused(account?: null): PausedEventFilter;
-        "QuorumFailure(uint256)"(actionId?: null): QuorumFailureEventFilter;
-        QuorumFailure(actionId?: null): QuorumFailureEventFilter;
-        "Transfer(uint256,uint64,uint256,string,uint256)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, value?: null): TransferEventFilter;
-        Transfer(actionId?: null, chainNonce?: null, txFees?: null, to?: null, value?: null): TransferEventFilter;
-        "TransferErc721(uint256,uint64,uint256,string,uint256,address)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null): TransferErc721EventFilter;
-        TransferErc721(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null): TransferErc721EventFilter;
-        "Unfreeze(uint256,uint64,uint256,string,uint256)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, value?: null): UnfreezeEventFilter;
-        Unfreeze(actionId?: null, chainNonce?: null, txFees?: null, to?: null, value?: null): UnfreezeEventFilter;
-        "UnfreezeNft(uint256,uint256,string,string)"(actionId?: null, txFees?: null, to?: null, data?: null): UnfreezeNftEventFilter;
-        UnfreezeNft(actionId?: null, txFees?: null, to?: null, data?: null): UnfreezeNftEventFilter;
+        "TransferErc1155(uint256,uint64,uint256,string,uint256,address,string,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc1155EventFilter;
+        TransferErc1155(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc1155EventFilter;
+        "TransferErc1155Batch(uint256,uint64,uint256,string,uint256[],address,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, ids?: null, contractAddr?: null, mintWith?: null): TransferErc1155BatchEventFilter;
+        TransferErc1155Batch(actionId?: null, chainNonce?: null, txFees?: null, to?: null, ids?: null, contractAddr?: null, mintWith?: null): TransferErc1155BatchEventFilter;
+        "TransferErc721(uint256,uint64,uint256,string,uint256,address,string,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc721EventFilter;
+        TransferErc721(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc721EventFilter;
+        "UnfreezeNft(uint256,uint256,uint256,string,address,uint256,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenId?: null, baseURI?: null): UnfreezeNftEventFilter;
+        UnfreezeNft(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenId?: null, baseURI?: null): UnfreezeNftEventFilter;
+        "UnfreezeNftBatch(uint256,uint256,uint256,string,address,uint256[],string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenIds?: null, baseURI?: null): UnfreezeNftBatchEventFilter;
+        UnfreezeNftBatch(actionId?: null, chainNonce?: null, txFees?: null, to?: null, burner?: null, tokenIds?: null, baseURI?: null): UnfreezeNftBatchEventFilter;
         "Unpaused(address)"(account?: null): UnpausedEventFilter;
         Unpaused(account?: null): UnpausedEventFilter;
     };
     estimateGas: {
-        freeze(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        HALF_Q(overrides?: CallOverrides): Promise<BigNumber>;
+        Q(overrides?: CallOverrides): Promise<BigNumber>;
+        actionCnt(overrides?: CallOverrides): Promise<BigNumber>;
+        freezeErc1155(erc1155Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        freezeErc721(erc721Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        freezeErc1155Batch(erc1155Contract: PromiseOrValue<string>, tokenIds: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        onERC721Received(arg0: string, arg1: string, arg2: BigNumberish, arg3: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<BigNumber>;
+        nftWhitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+        onERC1155BatchReceived(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>[], arg3: PromiseOrValue<BigNumberish>[], arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<BigNumber>;
+        onERC1155Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BigNumberish>, arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<BigNumber>;
+        onERC721Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
         paused(overrides?: CallOverrides): Promise<BigNumber>;
-        validateAddValidator(actionId: BigNumberish, newValidator: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<BigNumber>;
+        validatePauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validatePauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferFees(actionId: PromiseOrValue<BigNumberish>, receiver: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateRemoveValidator(actionId: BigNumberish, oldValidator: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferNft(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, nftId: PromiseOrValue<BigNumberish>, mintWith: PromiseOrValue<string>, mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateSetThreshold(actionId: BigNumberish, newThreshold: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferNftBatch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], mintWith: PromiseOrValue<string>[], mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateTransfer(actionId: BigNumberish, chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc1155(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateTransferNft(actionId: BigNumberish, to: string, data: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc1155Batch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], contractAddrs: PromiseOrValue<string>[], sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateUnfreeze(actionId: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc721(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateUnfreezeNft(actionId: BigNumberish, to: string, tokenId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnpauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateUnpauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUpdateGroupKey(actionId: PromiseOrValue<BigNumberish>, _validatorPKX: PromiseOrValue<BigNumberish>, _validatorPKYP: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateWhitelistNft(actionId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateWhitelistNft(actionId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        validateWithdrawFees(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validatorPKX(overrides?: CallOverrides): Promise<BigNumber>;
+        validatorPKYParity(overrides?: CallOverrides): Promise<BigNumber>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+        withdrawNft(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, id: PromiseOrValue<BigNumberish>, burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        withdraw(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
-        }): Promise<BigNumber>;
-        withdrawNft(to: string, id: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        withdrawNftBatch(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, ids: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
     };
     populateTransaction: {
-        freeze(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        HALF_Q(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        Q(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        actionCnt(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        freezeErc1155(erc1155Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        freezeErc721(erc721Contract: string, tokenId: BigNumberish, chainNonce: BigNumberish, to: string, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        freezeErc1155Batch(erc1155Contract: PromiseOrValue<string>, tokenIds: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        onERC721Received(arg0: string, arg1: string, arg2: BigNumberish, arg3: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<PopulatedTransaction>;
+        nftWhitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        onERC1155BatchReceived(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>[], arg3: PromiseOrValue<BigNumberish>[], arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<PopulatedTransaction>;
+        onERC1155Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BigNumberish>, arg4: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<PopulatedTransaction>;
+        onERC721Received(arg0: PromiseOrValue<string>, arg1: PromiseOrValue<string>, arg2: PromiseOrValue<BigNumberish>, arg3: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        validateAddValidator(actionId: BigNumberish, newValidator: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        validatePauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validatePauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferFees(actionId: PromiseOrValue<BigNumberish>, receiver: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateRemoveValidator(actionId: BigNumberish, oldValidator: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferNft(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, nftId: PromiseOrValue<BigNumberish>, mintWith: PromiseOrValue<string>, mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateSetThreshold(actionId: BigNumberish, newThreshold: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateTransferNftBatch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], mintWith: PromiseOrValue<string>[], mintArgs: PromiseOrValue<BytesLike>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateTransfer(actionId: BigNumberish, chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc1155(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateTransferNft(actionId: BigNumberish, to: string, data: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc1155Batch(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], contractAddrs: PromiseOrValue<string>[], sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateUnfreeze(actionId: BigNumberish, to: string, value: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnfreezeErc721(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateUnfreezeNft(actionId: BigNumberish, to: string, tokenId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUnpauseBridge(actionId: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateUnpauseBridge(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateUpdateGroupKey(actionId: PromiseOrValue<BigNumberish>, _validatorPKX: PromiseOrValue<BigNumberish>, _validatorPKYP: PromiseOrValue<BigNumberish>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateWhitelistNft(actionId: BigNumberish, contractAddr: string, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validateWhitelistNft(actionId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        validateWithdrawFees(actionId: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        validatorPKX(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        validatorPKYParity(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        verifySignature(signingPubKeyX: PromiseOrValue<BigNumberish>, pubKeyYParity: PromiseOrValue<BigNumberish>, signature: PromiseOrValue<BigNumberish>, msgHash: PromiseOrValue<BigNumberish>, nonceTimesGeneratorAddress: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        withdrawNft(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, id: PromiseOrValue<BigNumberish>, burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        withdraw(chainNonce: BigNumberish, to: string, value: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
-        }): Promise<PopulatedTransaction>;
-        withdrawNft(to: string, id: BigNumberish, overrides?: PayableOverrides & {
-            from?: string | Promise<string>;
+        withdrawNftBatch(to: PromiseOrValue<string>, chainNonce: PromiseOrValue<BigNumberish>, ids: PromiseOrValue<BigNumberish>[], ones: PromiseOrValue<BigNumberish>[], burner: PromiseOrValue<string>, overrides?: PayableOverrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
     };
 }

@@ -1,7 +1,7 @@
-import { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
-import { FunctionFragment, Result } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "./common";
 export interface BridgeNFTBatchInterface extends utils.Interface {
     functions: {
         "baseURI()": FunctionFragment;
@@ -10,11 +10,25 @@ export interface BridgeNFTBatchInterface extends utils.Interface {
         "mint(address,uint256,bytes)": FunctionFragment;
         "mintBatch(address,uint256[],uint256[],bytes)": FunctionFragment;
     };
+    getFunction(nameOrSignatureOrTopic: "baseURI" | "burnBatchFor" | "burnFor" | "mint" | "mintBatch"): FunctionFragment;
     encodeFunctionData(functionFragment: "baseURI", values?: undefined): string;
-    encodeFunctionData(functionFragment: "burnBatchFor", values: [string, BigNumberish[], BigNumberish[]]): string;
-    encodeFunctionData(functionFragment: "burnFor", values: [string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: "mint", values: [string, BigNumberish, BytesLike]): string;
-    encodeFunctionData(functionFragment: "mintBatch", values: [string, BigNumberish[], BigNumberish[], BytesLike]): string;
+    encodeFunctionData(functionFragment: "burnBatchFor", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BigNumberish>[]
+    ]): string;
+    encodeFunctionData(functionFragment: "burnFor", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
+    encodeFunctionData(functionFragment: "mint", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>,
+        PromiseOrValue<BytesLike>
+    ]): string;
+    encodeFunctionData(functionFragment: "mintBatch", values: [
+        PromiseOrValue<string>,
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BigNumberish>[],
+        PromiseOrValue<BytesLike>
+    ]): string;
     decodeFunctionResult(functionFragment: "baseURI", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "burnBatchFor", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "burnFor", data: BytesLike): Result;
@@ -38,76 +52,76 @@ export interface BridgeNFTBatch extends BaseContract {
     removeListener: OnEvent<this>;
     functions: {
         baseURI(overrides?: Overrides & {
-            from?: string | Promise<string>;
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        burnBatchFor(from: string, ids: BigNumberish[], amounts: BigNumberish[], overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnBatchFor(from: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        mintBatch(to: string, ids: BigNumberish[], amounts: BigNumberish[], mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mintBatch(to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
     };
     baseURI(overrides?: Overrides & {
-        from?: string | Promise<string>;
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    burnBatchFor(from: string, ids: BigNumberish[], amounts: BigNumberish[], overrides?: Overrides & {
-        from?: string | Promise<string>;
+    burnBatchFor(from: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    mintBatch(to: string, ids: BigNumberish[], amounts: BigNumberish[], mintArgs: BytesLike, overrides?: Overrides & {
-        from?: string | Promise<string>;
+    mintBatch(to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     callStatic: {
         baseURI(overrides?: CallOverrides): Promise<string>;
-        burnBatchFor(from: string, ids: BigNumberish[], amounts: BigNumberish[], overrides?: CallOverrides): Promise<void>;
-        burnFor(to: string, id: BigNumberish, overrides?: CallOverrides): Promise<void>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: CallOverrides): Promise<void>;
-        mintBatch(to: string, ids: BigNumberish[], amounts: BigNumberish[], mintArgs: BytesLike, overrides?: CallOverrides): Promise<void>;
+        burnBatchFor(from: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], overrides?: CallOverrides): Promise<void>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<void>;
+        mintBatch(to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], mintArgs: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {};
     estimateGas: {
         baseURI(overrides?: Overrides & {
-            from?: string | Promise<string>;
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        burnBatchFor(from: string, ids: BigNumberish[], amounts: BigNumberish[], overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnBatchFor(from: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        mintBatch(to: string, ids: BigNumberish[], amounts: BigNumberish[], mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mintBatch(to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
     };
     populateTransaction: {
         baseURI(overrides?: Overrides & {
-            from?: string | Promise<string>;
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        burnBatchFor(from: string, ids: BigNumberish[], amounts: BigNumberish[], overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnBatchFor(from: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        burnFor(to: string, id: BigNumberish, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        burnFor(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        mint(to: string, id: BigNumberish, mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mint(to: PromiseOrValue<string>, id: PromiseOrValue<BigNumberish>, mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        mintBatch(to: string, ids: BigNumberish[], amounts: BigNumberish[], mintArgs: BytesLike, overrides?: Overrides & {
-            from?: string | Promise<string>;
+        mintBatch(to: PromiseOrValue<string>, ids: PromiseOrValue<BigNumberish>[], amounts: PromiseOrValue<BigNumberish>[], mintArgs: PromiseOrValue<BytesLike>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
     };
 }

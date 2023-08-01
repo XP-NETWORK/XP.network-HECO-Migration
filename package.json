@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json && yarn copy-dts"
   },
   "dependencies": {
-    "ethers": "^5.5.3"
+    "ethers": "^5.5.4"
   },
   "devDependencies": {
     "typescript": "^4",
