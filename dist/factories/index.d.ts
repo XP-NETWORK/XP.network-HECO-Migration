@@ -1,3 +1,4 @@
+export * as htsMinterSol from "./HTSMinter.sol";
 export * as testHederaSol from "./TestHedera.sol";
 export * as erc1155CollectionSol from "./erc1155Collection.sol";
 export * as erc721RoyalitySol from "./erc721Royality.sol";
@@ -7,6 +8,7 @@ export { CollectionCreator__factory } from "./CollectionCreator__factory";
 export { CollectionCreator1155__factory } from "./CollectionCreator1155__factory";
 export { Erc1155Minter__factory } from "./Erc1155Minter__factory";
 export { HederaCollectionCreator__factory } from "./HederaCollectionCreator__factory";
+export { IHRC__factory } from "./IHRC__factory";
 export { INoWhitelistUtils__factory } from "./INoWhitelistUtils__factory";
 export { IXPNftHtsClaims__factory } from "./IXPNftHtsClaims__factory";
 export { Minter__factory } from "./Minter__factory";

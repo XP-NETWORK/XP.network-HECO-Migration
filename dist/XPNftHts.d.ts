@@ -172,10 +172,28 @@ export interface XPNftHtsInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "updateTokenExpiryInfo", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "updateTokenInfo", data: BytesLike): Result;
     events: {
+        "Burned(address,int64)": EventFragment;
+        "Minted(address,int64)": EventFragment;
         "OwnershipTransferred(address,address)": EventFragment;
+        "Transfer(address,address,int64)": EventFragment;
     };
+    getEvent(nameOrSignatureOrTopic: "Burned"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "Minted"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
+export interface BurnedEventObject {
+    htsToken: string;
+    tokenId: BigNumber;
+}
+export declare type BurnedEvent = TypedEvent<[string, BigNumber], BurnedEventObject>;
+export declare type BurnedEventFilter = TypedEventFilter<BurnedEvent>;
+export interface MintedEventObject {
+    htsToken: string;
+    tokenId: BigNumber;
+}
+export declare type MintedEvent = TypedEvent<[string, BigNumber], MintedEventObject>;
+export declare type MintedEventFilter = TypedEventFilter<MintedEvent>;
 export interface OwnershipTransferredEventObject {
     previousOwner: string;
     newOwner: string;
@@ -185,6 +203,17 @@ export declare type OwnershipTransferredEvent = TypedEvent<[
     string
 ], OwnershipTransferredEventObject>;
 export declare type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
+export interface TransferEventObject {
+    from: string;
+    to: string;
+    tokenId: BigNumber;
+}
+export declare type TransferEvent = TypedEvent<[
+    string,
+    string,
+    BigNumber
+], TransferEventObject>;
+export declare type TransferEventFilter = TypedEventFilter<TransferEvent>;
 export interface XPNftHts extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;
@@ -352,8 +381,14 @@ export interface XPNftHts extends BaseContract {
         updateTokenInfo(token: PromiseOrValue<string>, tokenInfo: IHederaTokenService.HederaTokenStruct, overrides?: CallOverrides): Promise<BigNumber>;
     };
     filters: {
+        "Burned(address,int64)"(htsToken?: PromiseOrValue<string> | null, tokenId?: PromiseOrValue<BigNumberish> | null): BurnedEventFilter;
+        Burned(htsToken?: PromiseOrValue<string> | null, tokenId?: PromiseOrValue<BigNumberish> | null): BurnedEventFilter;
+        "Minted(address,int64)"(htsToken?: PromiseOrValue<string> | null, tokenId?: PromiseOrValue<BigNumberish> | null): MintedEventFilter;
+        Minted(htsToken?: PromiseOrValue<string> | null, tokenId?: PromiseOrValue<BigNumberish> | null): MintedEventFilter;
         "OwnershipTransferred(address,address)"(previousOwner?: PromiseOrValue<string> | null, newOwner?: PromiseOrValue<string> | null): OwnershipTransferredEventFilter;
         OwnershipTransferred(previousOwner?: PromiseOrValue<string> | null, newOwner?: PromiseOrValue<string> | null): OwnershipTransferredEventFilter;
+        "Transfer(address,address,int64)"(from?: PromiseOrValue<string> | null, to?: PromiseOrValue<string> | null, tokenId?: PromiseOrValue<BigNumberish> | null): TransferEventFilter;
+        Transfer(from?: PromiseOrValue<string> | null, to?: PromiseOrValue<string> | null, tokenId?: PromiseOrValue<BigNumberish> | null): TransferEventFilter;
     };
     estimateGas: {
         DEFAULT_EXPIRY(overrides?: CallOverrides): Promise<BigNumber>;

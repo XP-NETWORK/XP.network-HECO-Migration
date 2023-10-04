@@ -1,5 +1,5 @@
 import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "./common";
 export interface XPNftHtsClaimsInterface extends utils.Interface {
@@ -29,8 +29,35 @@ export interface XPNftHtsClaimsInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "getClaimRecord", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "getClaimableNfts", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "xpNftHts", data: BytesLike): Result;
-    events: {};
+    events: {
+        "ClaimCreated(address,address,int64)": EventFragment;
+        "ClaimRemoved(address,address,int64)": EventFragment;
+    };
+    getEvent(nameOrSignatureOrTopic: "ClaimCreated"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "ClaimRemoved"): EventFragment;
 }
+export interface ClaimCreatedEventObject {
+    to: string;
+    token: string;
+    serial: BigNumber;
+}
+export declare type ClaimCreatedEvent = TypedEvent<[
+    string,
+    string,
+    BigNumber
+], ClaimCreatedEventObject>;
+export declare type ClaimCreatedEventFilter = TypedEventFilter<ClaimCreatedEvent>;
+export interface ClaimRemovedEventObject {
+    to: string;
+    token: string;
+    serial: BigNumber;
+}
+export declare type ClaimRemovedEvent = TypedEvent<[
+    string,
+    string,
+    BigNumber
+], ClaimRemovedEventObject>;
+export declare type ClaimRemovedEventFilter = TypedEventFilter<ClaimRemovedEvent>;
 export interface XPNftHtsClaims extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;
@@ -72,7 +99,12 @@ export interface XPNftHtsClaims extends BaseContract {
         getClaimableNfts(claimer: PromiseOrValue<string>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber[]>;
         xpNftHts(overrides?: CallOverrides): Promise<string>;
     };
-    filters: {};
+    filters: {
+        "ClaimCreated(address,address,int64)"(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimCreatedEventFilter;
+        ClaimCreated(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimCreatedEventFilter;
+        "ClaimRemoved(address,address,int64)"(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimRemovedEventFilter;
+        ClaimRemoved(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimRemovedEventFilter;
+    };
     estimateGas: {
         addClaimRecord(to: PromiseOrValue<string>, token: PromiseOrValue<string>, serial: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
