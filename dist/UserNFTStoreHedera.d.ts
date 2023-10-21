@@ -79,8 +79,10 @@ export declare namespace IHederaTokenService {
 }
 export interface UserNFTStoreHederaInterface extends utils.Interface {
     functions: {
+        "claimNft(int64,address)": FunctionFragment;
         "decodeHts(uint256)": FunctionFragment;
         "freezeErc721(address,uint256,uint64,string,string)": FunctionFragment;
+        "getClaimableNfts(address,address)": FunctionFragment;
         "getTokenExpiryInfo(address)": FunctionFragment;
         "grantTokenKyc(address,address)": FunctionFragment;
         "isKyc(address,address)": FunctionFragment;
@@ -92,7 +94,8 @@ export interface UserNFTStoreHederaInterface extends utils.Interface {
         "updateTokenInfo(address,(string,string,address,string,bool,int64,bool,(uint256,(bool,address,bytes,bytes,address))[],(uint32,address,uint32)))": FunctionFragment;
         "validateUnfreezeErc721(uint256,address,uint256,address,uint256,address)": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "decodeHts" | "freezeErc721" | "getTokenExpiryInfo" | "grantTokenKyc" | "isKyc" | "noWhitelistUtils" | "pauseToken" | "revokeTokenKyc" | "unpauseToken" | "updateTokenExpiryInfo" | "updateTokenInfo" | "validateUnfreezeErc721"): FunctionFragment;
+    getFunction(nameOrSignatureOrTopic: "claimNft" | "decodeHts" | "freezeErc721" | "getClaimableNfts" | "getTokenExpiryInfo" | "grantTokenKyc" | "isKyc" | "noWhitelistUtils" | "pauseToken" | "revokeTokenKyc" | "unpauseToken" | "updateTokenExpiryInfo" | "updateTokenInfo" | "validateUnfreezeErc721"): FunctionFragment;
+    encodeFunctionData(functionFragment: "claimNft", values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "decodeHts", values: [PromiseOrValue<BigNumberish>]): string;
     encodeFunctionData(functionFragment: "freezeErc721", values: [
         PromiseOrValue<string>,
@@ -101,6 +104,7 @@ export interface UserNFTStoreHederaInterface extends utils.Interface {
         PromiseOrValue<string>,
         PromiseOrValue<string>
     ]): string;
+    encodeFunctionData(functionFragment: "getClaimableNfts", values: [PromiseOrValue<string>, PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "getTokenExpiryInfo", values: [PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "grantTokenKyc", values: [PromiseOrValue<string>, PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "isKyc", values: [PromiseOrValue<string>, PromiseOrValue<string>]): string;
@@ -118,8 +122,10 @@ export interface UserNFTStoreHederaInterface extends utils.Interface {
         PromiseOrValue<BigNumberish>,
         PromiseOrValue<string>
     ]): string;
+    decodeFunctionResult(functionFragment: "claimNft", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "decodeHts", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "freezeErc721", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "getClaimableNfts", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "getTokenExpiryInfo", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "grantTokenKyc", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "isKyc", data: BytesLike): Result;
@@ -131,10 +137,36 @@ export interface UserNFTStoreHederaInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "updateTokenInfo", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "validateUnfreezeErc721", data: BytesLike): Result;
     events: {
+        "ClaimCreated(address,address,int64)": EventFragment;
+        "ClaimRemoved(address,address,int64)": EventFragment;
         "TransferErc721(uint256,uint64,uint256,string,uint256,address,string,string)": EventFragment;
     };
+    getEvent(nameOrSignatureOrTopic: "ClaimCreated"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "ClaimRemoved"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "TransferErc721"): EventFragment;
 }
+export interface ClaimCreatedEventObject {
+    to: string;
+    token: string;
+    serial: BigNumber;
+}
+export declare type ClaimCreatedEvent = TypedEvent<[
+    string,
+    string,
+    BigNumber
+], ClaimCreatedEventObject>;
+export declare type ClaimCreatedEventFilter = TypedEventFilter<ClaimCreatedEvent>;
+export interface ClaimRemovedEventObject {
+    to: string;
+    token: string;
+    serial: BigNumber;
+}
+export declare type ClaimRemovedEvent = TypedEvent<[
+    string,
+    string,
+    BigNumber
+], ClaimRemovedEventObject>;
+export declare type ClaimRemovedEventFilter = TypedEventFilter<ClaimRemovedEvent>;
 export interface TransferErc721EventObject {
     actionId: BigNumber;
     chainNonce: BigNumber;
@@ -171,10 +203,14 @@ export interface UserNFTStoreHedera extends BaseContract {
     once: OnEvent<this>;
     removeListener: OnEvent<this>;
     functions: {
+        claimNft(serialNum: PromiseOrValue<BigNumberish>, token: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<ContractTransaction>;
         decodeHts(data: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string, BigNumber]>;
         freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
+        getClaimableNfts(claimer: PromiseOrValue<string>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[BigNumber[]]>;
         getTokenExpiryInfo(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
@@ -204,10 +240,14 @@ export interface UserNFTStoreHedera extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
     };
+    claimNft(serialNum: PromiseOrValue<BigNumberish>, token: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
+    }): Promise<ContractTransaction>;
     decodeHts(data: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string, BigNumber]>;
     freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
+    getClaimableNfts(claimer: PromiseOrValue<string>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber[]>;
     getTokenExpiryInfo(token: PromiseOrValue<string>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
@@ -237,8 +277,10 @@ export interface UserNFTStoreHedera extends BaseContract {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     callStatic: {
+        claimNft(serialNum: PromiseOrValue<BigNumberish>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
         decodeHts(data: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string, BigNumber]>;
         freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+        getClaimableNfts(claimer: PromiseOrValue<string>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber[]>;
         getTokenExpiryInfo(token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
             BigNumber,
             IHederaTokenService.ExpiryStructOutput
@@ -263,14 +305,22 @@ export interface UserNFTStoreHedera extends BaseContract {
         validateUnfreezeErc721(actionId: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, contractAddr: PromiseOrValue<string>, sig: PromiseOrValue<BigNumberish>, proofAddr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {
+        "ClaimCreated(address,address,int64)"(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimCreatedEventFilter;
+        ClaimCreated(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimCreatedEventFilter;
+        "ClaimRemoved(address,address,int64)"(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimRemovedEventFilter;
+        ClaimRemoved(to?: PromiseOrValue<string> | null, token?: PromiseOrValue<string> | null, serial?: PromiseOrValue<BigNumberish> | null): ClaimRemovedEventFilter;
         "TransferErc721(uint256,uint64,uint256,string,uint256,address,string,string)"(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc721EventFilter;
         TransferErc721(actionId?: null, chainNonce?: null, txFees?: null, to?: null, id?: null, contractAddr?: null, tokenData?: null, mintWith?: null): TransferErc721EventFilter;
     };
     estimateGas: {
+        claimNft(serialNum: PromiseOrValue<BigNumberish>, token: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<BigNumber>;
         decodeHts(data: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
         freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
+        getClaimableNfts(claimer: PromiseOrValue<string>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
         getTokenExpiryInfo(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
@@ -301,10 +351,14 @@ export interface UserNFTStoreHedera extends BaseContract {
         }): Promise<BigNumber>;
     };
     populateTransaction: {
+        claimNft(serialNum: PromiseOrValue<BigNumberish>, token: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<PopulatedTransaction>;
         decodeHts(data: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
         freezeErc721(erc721Contract: PromiseOrValue<string>, tokenId: PromiseOrValue<BigNumberish>, chainNonce: PromiseOrValue<BigNumberish>, to: PromiseOrValue<string>, mintWith: PromiseOrValue<string>, overrides?: PayableOverrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
+        getClaimableNfts(claimer: PromiseOrValue<string>, token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
         getTokenExpiryInfo(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
