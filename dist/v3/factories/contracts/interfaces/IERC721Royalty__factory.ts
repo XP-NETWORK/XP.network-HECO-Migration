@@ -2,7 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Interface, type ContractRunner } from "ethers";
+import { Contract, Signer, utils } from "ethers";
+import type { Provider } from "@ethersproject/providers";
 import type {
   IERC721Royalty,
   IERC721RoyaltyInterface,
@@ -95,12 +96,12 @@ const _abi = [
 export class IERC721Royalty__factory {
   static readonly abi = _abi;
   static createInterface(): IERC721RoyaltyInterface {
-    return new Interface(_abi) as IERC721RoyaltyInterface;
+    return new utils.Interface(_abi) as IERC721RoyaltyInterface;
   }
   static connect(
     address: string,
-    runner?: ContractRunner | null
+    signerOrProvider: Signer | Provider
   ): IERC721Royalty {
-    return new Contract(address, _abi, runner) as unknown as IERC721Royalty;
+    return new Contract(address, _abi, signerOrProvider) as IERC721Royalty;
   }
 }

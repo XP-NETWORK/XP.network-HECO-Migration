@@ -3,27 +3,35 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumber,
   BigNumberish,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../../common";
 
-export interface INFTStorageERC1155Interface extends Interface {
+export interface INFTStorageERC1155Interface extends utils.Interface {
+  functions: {
+    "collectionAddress()": FunctionFragment;
+    "depositToken(uint256,uint256)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "unlockToken(uint256,uint256,address)": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "collectionAddress"
       | "depositToken"
       | "owner"
@@ -41,7 +49,7 @@ export interface INFTStorageERC1155Interface extends Interface {
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "unlockToken",
-    values: [BigNumberish, BigNumberish, AddressLike]
+    values: [BigNumberish, BigNumberish, string]
   ): string;
 
   decodeFunctionResult(
@@ -57,91 +65,128 @@ export interface INFTStorageERC1155Interface extends Interface {
     functionFragment: "unlockToken",
     data: BytesLike
   ): Result;
+
+  events: {};
 }
 
 export interface INFTStorageERC1155 extends BaseContract {
-  connect(runner?: ContractRunner | null): INFTStorageERC1155;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: INFTStorageERC1155Interface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    collectionAddress(overrides?: CallOverrides): Promise<[string]>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+    depositToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  collectionAddress: TypedContractMethod<[], [string], "view">;
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
-  depositToken: TypedContractMethod<
-    [tokenId: BigNumberish, amount: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
+    unlockToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      to: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+  };
 
-  owner: TypedContractMethod<[], [string], "view">;
+  collectionAddress(overrides?: CallOverrides): Promise<string>;
 
-  unlockToken: TypedContractMethod<
-    [tokenId: BigNumberish, amount: BigNumberish, to: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  depositToken(
+    tokenId: BigNumberish,
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  owner(overrides?: CallOverrides): Promise<string>;
 
-  getFunction(
-    nameOrSignature: "collectionAddress"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "depositToken"
-  ): TypedContractMethod<
-    [tokenId: BigNumberish, amount: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "owner"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "unlockToken"
-  ): TypedContractMethod<
-    [tokenId: BigNumberish, amount: BigNumberish, to: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  unlockToken(
+    tokenId: BigNumberish,
+    amount: BigNumberish,
+    to: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  callStatic: {
+    collectionAddress(overrides?: CallOverrides): Promise<string>;
+
+    depositToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    unlockToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      to: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+  };
 
   filters: {};
+
+  estimateGas: {
+    collectionAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    depositToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    unlockToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      to: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    collectionAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    depositToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    unlockToken(
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      to: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+  };
 }

@@ -3,44 +3,68 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumber,
   BigNumberish,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../common";
 
 export type ChainFeeStruct = { chain: string; fee: BigNumberish };
 
-export type ChainFeeStructOutput = [chain: string, fee: bigint] & {
+export type ChainFeeStructOutput = [string, BigNumber] & {
   chain: string;
-  fee: bigint;
+  fee: BigNumber;
 };
 
 export type SignerAndSignatureStruct = {
-  publicAddress: AddressLike;
+  publicAddress: string;
   signature: string;
 };
 
-export type SignerAndSignatureStructOutput = [
-  publicAddress: string,
-  signature: string
-] & { publicAddress: string; signature: string };
+export type SignerAndSignatureStructOutput = [string, string] & {
+  publicAddress: string;
+  signature: string;
+};
 
-export interface BridgeStorageInterface extends Interface {
+export interface BridgeStorageInterface extends utils.Interface {
+  functions: {
+    "approveLockNft(string,string,string)": FunctionFragment;
+    "approveStake(address,string)": FunctionFragment;
+    "chainEpoch(string)": FunctionFragment;
+    "chainFee(string)": FunctionFragment;
+    "chainFeeVoted(string,uint256,address,uint256)": FunctionFragment;
+    "chainFeeVotes(string,uint256,uint256)": FunctionFragment;
+    "changeChainFee(string,uint256)": FunctionFragment;
+    "changeValidatorStatus(address,bool)": FunctionFragment;
+    "getLockNftSignatures(string,string)": FunctionFragment;
+    "getLockNftSignaturesCount(string,string)": FunctionFragment;
+    "getStakingSignatures(address)": FunctionFragment;
+    "getStakingSignaturesCount(address)": FunctionFragment;
+    "lockSignatures(string,string,uint256)": FunctionFragment;
+    "stakingSignatures(address,uint256)": FunctionFragment;
+    "usedSignatures(string)": FunctionFragment;
+    "validatorCount()": FunctionFragment;
+    "validatorEpoch(address)": FunctionFragment;
+    "validatorStatusChangeVotes(address,bool,uint256)": FunctionFragment;
+    "validatorVoted(address,address,uint256)": FunctionFragment;
+    "validators(address)": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "approveLockNft"
       | "approveStake"
       | "chainEpoch"
@@ -69,13 +93,13 @@ export interface BridgeStorageInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "approveStake",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "chainEpoch", values: [string]): string;
   encodeFunctionData(functionFragment: "chainFee", values: [string]): string;
   encodeFunctionData(
     functionFragment: "chainFeeVoted",
-    values: [string, BigNumberish, AddressLike, BigNumberish]
+    values: [string, BigNumberish, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "chainFeeVotes",
@@ -87,7 +111,7 @@ export interface BridgeStorageInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "changeValidatorStatus",
-    values: [AddressLike, boolean]
+    values: [string, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "getLockNftSignatures",
@@ -99,11 +123,11 @@ export interface BridgeStorageInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getStakingSignatures",
-    values: [AddressLike]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "getStakingSignaturesCount",
-    values: [AddressLike]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "lockSignatures",
@@ -111,7 +135,7 @@ export interface BridgeStorageInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "stakingSignatures",
-    values: [AddressLike, BigNumberish]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "usedSignatures",
@@ -123,20 +147,17 @@ export interface BridgeStorageInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "validatorEpoch",
-    values: [AddressLike]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "validatorStatusChangeVotes",
-    values: [AddressLike, boolean, BigNumberish]
+    values: [string, boolean, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "validatorVoted",
-    values: [AddressLike, AddressLike, BigNumberish]
+    values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "validators",
-    values: [AddressLike]
-  ): string;
+  encodeFunctionData(functionFragment: "validators", values: [string]): string;
 
   decodeFunctionResult(
     functionFragment: "approveLockNft",
@@ -209,263 +230,566 @@ export interface BridgeStorageInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "validators", data: BytesLike): Result;
+
+  events: {};
 }
 
 export interface BridgeStorage extends BaseContract {
-  connect(runner?: ContractRunner | null): BridgeStorage;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: BridgeStorageInterface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    approveLockNft(
+      _transactionHash: string,
+      _chain: string,
+      _signature: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+    approveStake(
+      _stakerAddress: string,
+      _signature: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  approveLockNft: TypedContractMethod<
-    [_transactionHash: string, _chain: string, _signature: string],
-    [void],
-    "nonpayable"
-  >;
+    chainEpoch(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-  approveStake: TypedContractMethod<
-    [_stakerAddress: AddressLike, _signature: string],
-    [void],
-    "nonpayable"
-  >;
+    chainFee(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-  chainEpoch: TypedContractMethod<[arg0: string], [bigint], "view">;
+    chainFeeVoted(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
-  chainFee: TypedContractMethod<[arg0: string], [bigint], "view">;
+    chainFeeVotes(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-  chainFeeVoted: TypedContractMethod<
-    [arg0: string, arg1: BigNumberish, arg2: AddressLike, arg3: BigNumberish],
-    [boolean],
-    "view"
-  >;
+    changeChainFee(
+      _chain: string,
+      _fee: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  chainFeeVotes: TypedContractMethod<
-    [arg0: string, arg1: BigNumberish, arg2: BigNumberish],
-    [bigint],
-    "view"
-  >;
+    changeValidatorStatus(
+      _validatorAddress: string,
+      _status: boolean,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  changeChainFee: TypedContractMethod<
-    [_chain: string, _fee: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
+    getLockNftSignatures(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<[SignerAndSignatureStructOutput[]]>;
 
-  changeValidatorStatus: TypedContractMethod<
-    [_validatorAddress: AddressLike, _status: boolean],
-    [void],
-    "nonpayable"
-  >;
+    getLockNftSignaturesCount(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-  getLockNftSignatures: TypedContractMethod<
-    [transactionHash: string, chain: string],
-    [SignerAndSignatureStructOutput[]],
-    "view"
-  >;
+    getStakingSignatures(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[SignerAndSignatureStructOutput[]]>;
 
-  getLockNftSignaturesCount: TypedContractMethod<
-    [transactionHash: string, chain: string],
-    [bigint],
-    "view"
-  >;
+    getStakingSignaturesCount(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-  getStakingSignatures: TypedContractMethod<
-    [stakerAddress: AddressLike],
-    [SignerAndSignatureStructOutput[]],
-    "view"
-  >;
+    lockSignatures(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
 
-  getStakingSignaturesCount: TypedContractMethod<
-    [stakerAddress: AddressLike],
-    [bigint],
-    "view"
-  >;
+    stakingSignatures(
+      arg0: string,
+      arg1: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
 
-  lockSignatures: TypedContractMethod<
-    [arg0: string, arg1: string, arg2: BigNumberish],
-    [[string, string] & { publicAddress: string; signature: string }],
-    "view"
-  >;
+    usedSignatures(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-  stakingSignatures: TypedContractMethod<
-    [arg0: AddressLike, arg1: BigNumberish],
-    [[string, string] & { publicAddress: string; signature: string }],
-    "view"
-  >;
+    validatorCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-  usedSignatures: TypedContractMethod<[arg0: string], [boolean], "view">;
+    validatorEpoch(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-  validatorCount: TypedContractMethod<[], [bigint], "view">;
+    validatorStatusChangeVotes(
+      arg0: string,
+      arg1: boolean,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-  validatorEpoch: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+    validatorVoted(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
-  validatorStatusChangeVotes: TypedContractMethod<
-    [arg0: AddressLike, arg1: boolean, arg2: BigNumberish],
-    [bigint],
-    "view"
-  >;
+    validators(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+  };
 
-  validatorVoted: TypedContractMethod<
-    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish],
-    [boolean],
-    "view"
-  >;
+  approveLockNft(
+    _transactionHash: string,
+    _chain: string,
+    _signature: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  validators: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  approveStake(
+    _stakerAddress: string,
+    _signature: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  chainEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  getFunction(
-    nameOrSignature: "approveLockNft"
-  ): TypedContractMethod<
-    [_transactionHash: string, _chain: string, _signature: string],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "approveStake"
-  ): TypedContractMethod<
-    [_stakerAddress: AddressLike, _signature: string],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "chainEpoch"
-  ): TypedContractMethod<[arg0: string], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "chainFee"
-  ): TypedContractMethod<[arg0: string], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "chainFeeVoted"
-  ): TypedContractMethod<
-    [arg0: string, arg1: BigNumberish, arg2: AddressLike, arg3: BigNumberish],
-    [boolean],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "chainFeeVotes"
-  ): TypedContractMethod<
-    [arg0: string, arg1: BigNumberish, arg2: BigNumberish],
-    [bigint],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "changeChainFee"
-  ): TypedContractMethod<
-    [_chain: string, _fee: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "changeValidatorStatus"
-  ): TypedContractMethod<
-    [_validatorAddress: AddressLike, _status: boolean],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "getLockNftSignatures"
-  ): TypedContractMethod<
-    [transactionHash: string, chain: string],
-    [SignerAndSignatureStructOutput[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getLockNftSignaturesCount"
-  ): TypedContractMethod<
-    [transactionHash: string, chain: string],
-    [bigint],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getStakingSignatures"
-  ): TypedContractMethod<
-    [stakerAddress: AddressLike],
-    [SignerAndSignatureStructOutput[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getStakingSignaturesCount"
-  ): TypedContractMethod<[stakerAddress: AddressLike], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "lockSignatures"
-  ): TypedContractMethod<
-    [arg0: string, arg1: string, arg2: BigNumberish],
-    [[string, string] & { publicAddress: string; signature: string }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "stakingSignatures"
-  ): TypedContractMethod<
-    [arg0: AddressLike, arg1: BigNumberish],
-    [[string, string] & { publicAddress: string; signature: string }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "usedSignatures"
-  ): TypedContractMethod<[arg0: string], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "validatorCount"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "validatorEpoch"
-  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "validatorStatusChangeVotes"
-  ): TypedContractMethod<
-    [arg0: AddressLike, arg1: boolean, arg2: BigNumberish],
-    [bigint],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "validatorVoted"
-  ): TypedContractMethod<
-    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish],
-    [boolean],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "validators"
-  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  chainFee(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  chainFeeVoted(
+    arg0: string,
+    arg1: BigNumberish,
+    arg2: string,
+    arg3: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  chainFeeVotes(
+    arg0: string,
+    arg1: BigNumberish,
+    arg2: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  changeChainFee(
+    _chain: string,
+    _fee: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  changeValidatorStatus(
+    _validatorAddress: string,
+    _status: boolean,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  getLockNftSignatures(
+    transactionHash: string,
+    chain: string,
+    overrides?: CallOverrides
+  ): Promise<SignerAndSignatureStructOutput[]>;
+
+  getLockNftSignaturesCount(
+    transactionHash: string,
+    chain: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getStakingSignatures(
+    stakerAddress: string,
+    overrides?: CallOverrides
+  ): Promise<SignerAndSignatureStructOutput[]>;
+
+  getStakingSignaturesCount(
+    stakerAddress: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  lockSignatures(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+
+  stakingSignatures(
+    arg0: string,
+    arg1: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+
+  usedSignatures(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+  validatorCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  validatorEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  validatorStatusChangeVotes(
+    arg0: string,
+    arg1: boolean,
+    arg2: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  validatorVoted(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  validators(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+  callStatic: {
+    approveLockNft(
+      _transactionHash: string,
+      _chain: string,
+      _signature: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    approveStake(
+      _stakerAddress: string,
+      _signature: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    chainEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    chainFee(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    chainFeeVoted(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    chainFeeVotes(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    changeChainFee(
+      _chain: string,
+      _fee: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    changeValidatorStatus(
+      _validatorAddress: string,
+      _status: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    getLockNftSignatures(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<SignerAndSignatureStructOutput[]>;
+
+    getLockNftSignaturesCount(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getStakingSignatures(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<SignerAndSignatureStructOutput[]>;
+
+    getStakingSignaturesCount(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    lockSignatures(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+
+    stakingSignatures(
+      arg0: string,
+      arg1: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+
+    usedSignatures(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+    validatorCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    validatorEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    validatorStatusChangeVotes(
+      arg0: string,
+      arg1: boolean,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    validatorVoted(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    validators(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+  };
 
   filters: {};
+
+  estimateGas: {
+    approveLockNft(
+      _transactionHash: string,
+      _chain: string,
+      _signature: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    approveStake(
+      _stakerAddress: string,
+      _signature: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    chainEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    chainFee(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    chainFeeVoted(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    chainFeeVotes(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    changeChainFee(
+      _chain: string,
+      _fee: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    changeValidatorStatus(
+      _validatorAddress: string,
+      _status: boolean,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    getLockNftSignatures(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getLockNftSignaturesCount(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getStakingSignatures(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getStakingSignaturesCount(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    lockSignatures(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    stakingSignatures(
+      arg0: string,
+      arg1: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    usedSignatures(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    validatorCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    validatorEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    validatorStatusChangeVotes(
+      arg0: string,
+      arg1: boolean,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    validatorVoted(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    validators(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    approveLockNft(
+      _transactionHash: string,
+      _chain: string,
+      _signature: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    approveStake(
+      _stakerAddress: string,
+      _signature: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    chainEpoch(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    chainFee(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    chainFeeVoted(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    chainFeeVotes(
+      arg0: string,
+      arg1: BigNumberish,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    changeChainFee(
+      _chain: string,
+      _fee: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    changeValidatorStatus(
+      _validatorAddress: string,
+      _status: boolean,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    getLockNftSignatures(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getLockNftSignaturesCount(
+      transactionHash: string,
+      chain: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getStakingSignatures(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getStakingSignaturesCount(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    lockSignatures(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    stakingSignatures(
+      arg0: string,
+      arg1: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    usedSignatures(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    validatorCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    validatorEpoch(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    validatorStatusChangeVotes(
+      arg0: string,
+      arg1: boolean,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    validatorVoted(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    validators(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+  };
 }

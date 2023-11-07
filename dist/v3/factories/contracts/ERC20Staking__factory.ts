@@ -2,19 +2,14 @@
 /* tslint:disable */
 /* eslint-disable */
 import {
+  Signer,
+  utils,
   Contract,
   ContractFactory,
-  ContractTransactionResponse,
-  Interface,
-} from "ethers";
-import type {
-  Signer,
   BigNumberish,
-  AddressLike,
-  ContractDeployTransaction,
-  ContractRunner,
+  Overrides,
 } from "ethers";
-import type { NonPayableOverrides } from "../../common";
+import type { Provider, TransactionRequest } from "@ethersproject/providers";
 import type {
   ERC20Staking,
   ERC20StakingInterface,
@@ -130,45 +125,44 @@ export class ERC20Staking__factory extends ContractFactory {
     }
   }
 
+  override deploy(
+    _stakingAmount: BigNumberish,
+    _ERC20Token: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ERC20Staking> {
+    return super.deploy(
+      _stakingAmount,
+      _ERC20Token,
+      overrides || {}
+    ) as Promise<ERC20Staking>;
+  }
   override getDeployTransaction(
     _stakingAmount: BigNumberish,
-    _ERC20Token: AddressLike,
-    overrides?: NonPayableOverrides & { from?: string }
-  ): Promise<ContractDeployTransaction> {
+    _ERC20Token: string,
+    overrides?: Overrides & { from?: string }
+  ): TransactionRequest {
     return super.getDeployTransaction(
       _stakingAmount,
       _ERC20Token,
       overrides || {}
     );
   }
-  override deploy(
-    _stakingAmount: BigNumberish,
-    _ERC20Token: AddressLike,
-    overrides?: NonPayableOverrides & { from?: string }
-  ) {
-    return super.deploy(
-      _stakingAmount,
-      _ERC20Token,
-      overrides || {}
-    ) as Promise<
-      ERC20Staking & {
-        deploymentTransaction(): ContractTransactionResponse;
-      }
-    >;
+  override attach(address: string): ERC20Staking {
+    return super.attach(address) as ERC20Staking;
   }
-  override connect(runner: ContractRunner | null): ERC20Staking__factory {
-    return super.connect(runner) as ERC20Staking__factory;
+  override connect(signer: Signer): ERC20Staking__factory {
+    return super.connect(signer) as ERC20Staking__factory;
   }
 
   static readonly bytecode = _bytecode;
   static readonly abi = _abi;
   static createInterface(): ERC20StakingInterface {
-    return new Interface(_abi) as ERC20StakingInterface;
+    return new utils.Interface(_abi) as ERC20StakingInterface;
   }
   static connect(
     address: string,
-    runner?: ContractRunner | null
+    signerOrProvider: Signer | Provider
   ): ERC20Staking {
-    return new Contract(address, _abi, runner) as unknown as ERC20Staking;
+    return new Contract(address, _abi, signerOrProvider) as ERC20Staking;
   }
 }

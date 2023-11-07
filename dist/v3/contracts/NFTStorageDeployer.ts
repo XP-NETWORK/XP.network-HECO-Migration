@@ -3,26 +3,34 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumber,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../common";
 
-export interface NFTStorageDeployerInterface extends Interface {
+export interface NFTStorageDeployerInterface extends utils.Interface {
+  functions: {
+    "deployNFT1155Storage(address)": FunctionFragment;
+    "deployNFT721Storage(address)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "setOwner(address)": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "deployNFT1155Storage"
       | "deployNFT721Storage"
       | "owner"
@@ -31,17 +39,14 @@ export interface NFTStorageDeployerInterface extends Interface {
 
   encodeFunctionData(
     functionFragment: "deployNFT1155Storage",
-    values: [AddressLike]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "deployNFT721Storage",
-    values: [AddressLike]
+    values: [string]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "setOwner",
-    values: [AddressLike]
-  ): string;
+  encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
 
   decodeFunctionResult(
     functionFragment: "deployNFT1155Storage",
@@ -53,91 +58,125 @@ export interface NFTStorageDeployerInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
+
+  events: {};
 }
 
 export interface NFTStorageDeployer extends BaseContract {
-  connect(runner?: ContractRunner | null): NFTStorageDeployer;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: NFTStorageDeployerInterface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    deployNFT1155Storage(
+      collectionAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+    deployNFT721Storage(
+      collectionAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  deployNFT1155Storage: TypedContractMethod<
-    [collectionAddress: AddressLike],
-    [string],
-    "nonpayable"
-  >;
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
-  deployNFT721Storage: TypedContractMethod<
-    [collectionAddress: AddressLike],
-    [string],
-    "nonpayable"
-  >;
+    setOwner(
+      _owner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+  };
 
-  owner: TypedContractMethod<[], [string], "view">;
+  deployNFT1155Storage(
+    collectionAddress: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  setOwner: TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+  deployNFT721Storage(
+    collectionAddress: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  owner(overrides?: CallOverrides): Promise<string>;
 
-  getFunction(
-    nameOrSignature: "deployNFT1155Storage"
-  ): TypedContractMethod<
-    [collectionAddress: AddressLike],
-    [string],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "deployNFT721Storage"
-  ): TypedContractMethod<
-    [collectionAddress: AddressLike],
-    [string],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "owner"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "setOwner"
-  ): TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+  setOwner(
+    _owner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  callStatic: {
+    deployNFT1155Storage(
+      collectionAddress: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    deployNFT721Storage(
+      collectionAddress: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    setOwner(_owner: string, overrides?: CallOverrides): Promise<void>;
+  };
 
   filters: {};
+
+  estimateGas: {
+    deployNFT1155Storage(
+      collectionAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    deployNFT721Storage(
+      collectionAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setOwner(
+      _owner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    deployNFT1155Storage(
+      collectionAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    deployNFT721Storage(
+      collectionAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setOwner(
+      _owner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+  };
 }

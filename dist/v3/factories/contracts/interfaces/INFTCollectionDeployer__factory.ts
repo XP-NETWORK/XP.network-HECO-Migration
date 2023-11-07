@@ -2,7 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Interface, type ContractRunner } from "ethers";
+import { Contract, Signer, utils } from "ethers";
+import type { Provider } from "@ethersproject/providers";
 import type {
   INFTCollectionDeployer,
   INFTCollectionDeployerInterface,
@@ -77,16 +78,16 @@ const _abi = [
 export class INFTCollectionDeployer__factory {
   static readonly abi = _abi;
   static createInterface(): INFTCollectionDeployerInterface {
-    return new Interface(_abi) as INFTCollectionDeployerInterface;
+    return new utils.Interface(_abi) as INFTCollectionDeployerInterface;
   }
   static connect(
     address: string,
-    runner?: ContractRunner | null
+    signerOrProvider: Signer | Provider
   ): INFTCollectionDeployer {
     return new Contract(
       address,
       _abi,
-      runner
-    ) as unknown as INFTCollectionDeployer;
+      signerOrProvider
+    ) as INFTCollectionDeployer;
   }
 }

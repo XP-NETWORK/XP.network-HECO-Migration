@@ -3,24 +3,28 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumber,
   BigNumberish,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  EventFragment,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PayableOverrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
-  TypedLogDescription,
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type {
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../common";
 
 export declare namespace Bridge {
@@ -28,12 +32,12 @@ export declare namespace Bridge {
     tokenId: BigNumberish;
     sourceChain: string;
     destinationChain: string;
-    destinationUserAddress: AddressLike;
-    sourceNftContractAddress: AddressLike;
+    destinationUserAddress: string;
+    sourceNftContractAddress: string;
     name: string;
     symbol: string;
     royalty: BigNumberish;
-    royaltyReceiver: AddressLike;
+    royaltyReceiver: string;
     metadata: string;
     transactionHash: string;
     tokenAmount: BigNumberish;
@@ -42,41 +46,62 @@ export declare namespace Bridge {
   };
 
   export type ClaimDataStructOutput = [
-    tokenId: bigint,
-    sourceChain: string,
-    destinationChain: string,
-    destinationUserAddress: string,
-    sourceNftContractAddress: string,
-    name: string,
-    symbol: string,
-    royalty: bigint,
-    royaltyReceiver: string,
-    metadata: string,
-    transactionHash: string,
-    tokenAmount: bigint,
-    nftType: string,
-    fee: bigint
+    BigNumber,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    BigNumber,
+    string,
+    string,
+    string,
+    BigNumber,
+    string,
+    BigNumber
   ] & {
-    tokenId: bigint;
+    tokenId: BigNumber;
     sourceChain: string;
     destinationChain: string;
     destinationUserAddress: string;
     sourceNftContractAddress: string;
     name: string;
     symbol: string;
-    royalty: bigint;
+    royalty: BigNumber;
     royaltyReceiver: string;
     metadata: string;
     transactionHash: string;
-    tokenAmount: bigint;
+    tokenAmount: BigNumber;
     nftType: string;
-    fee: bigint;
+    fee: BigNumber;
   };
 }
 
-export interface BridgeInterface extends Interface {
+export interface BridgeInterface extends utils.Interface {
+  functions: {
+    "addValidator(address,bytes[])": FunctionFragment;
+    "claimNFT1155((uint256,string,string,address,address,string,string,uint256,address,string,string,uint256,string,uint256),bytes[])": FunctionFragment;
+    "claimNFT721((uint256,string,string,address,address,string,string,uint256,address,string,string,uint256,string,uint256),bytes[])": FunctionFragment;
+    "claimValidatorRewards(address,bytes[])": FunctionFragment;
+    "collectionDeployer()": FunctionFragment;
+    "duplicateStorageMapping1155(address,string)": FunctionFragment;
+    "duplicateStorageMapping721(address,string)": FunctionFragment;
+    "duplicateToOriginalMapping(address,string)": FunctionFragment;
+    "lock1155(uint256,string,string,address,uint256)": FunctionFragment;
+    "lock721(uint256,string,string,address)": FunctionFragment;
+    "originalStorageMapping1155(address,string)": FunctionFragment;
+    "originalStorageMapping721(address,string)": FunctionFragment;
+    "originalToDuplicateMapping(address,string)": FunctionFragment;
+    "selfChain()": FunctionFragment;
+    "storageDeployer()": FunctionFragment;
+    "uniqueIdentifier(bytes32)": FunctionFragment;
+    "validators(address)": FunctionFragment;
+    "validatorsCount()": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "addValidator"
       | "claimNFT1155"
       | "claimNFT721"
@@ -97,20 +122,9 @@ export interface BridgeInterface extends Interface {
       | "validatorsCount"
   ): FunctionFragment;
 
-  getEvent(
-    nameOrSignatureOrTopic:
-      | "AddNewValidator"
-      | "Claimed"
-      | "Locked"
-      | "LogHash"
-      | "RewardValidator"
-      | "UnLock1155"
-      | "UnLock721"
-  ): EventFragment;
-
   encodeFunctionData(
     functionFragment: "addValidator",
-    values: [AddressLike, BytesLike[]]
+    values: [string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "claimNFT1155",
@@ -122,7 +136,7 @@ export interface BridgeInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "claimValidatorRewards",
-    values: [AddressLike, BytesLike[]]
+    values: [string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "collectionDeployer",
@@ -130,35 +144,35 @@ export interface BridgeInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "duplicateStorageMapping1155",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "duplicateStorageMapping721",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "duplicateToOriginalMapping",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "lock1155",
-    values: [BigNumberish, string, string, AddressLike, BigNumberish]
+    values: [BigNumberish, string, string, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "lock721",
-    values: [BigNumberish, string, string, AddressLike]
+    values: [BigNumberish, string, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "originalStorageMapping1155",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "originalStorageMapping721",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "originalToDuplicateMapping",
-    values: [AddressLike, string]
+    values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "selfChain", values?: undefined): string;
   encodeFunctionData(
@@ -169,10 +183,7 @@ export interface BridgeInterface extends Interface {
     functionFragment: "uniqueIdentifier",
     values: [BytesLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "validators",
-    values: [AddressLike]
-  ): string;
+  encodeFunctionData(functionFragment: "validators", values: [string]): string;
   encodeFunctionData(
     functionFragment: "validatorsCount",
     values?: undefined
@@ -238,509 +249,677 @@ export interface BridgeInterface extends Interface {
     functionFragment: "validatorsCount",
     data: BytesLike
   ): Result;
+
+  events: {
+    "AddNewValidator(address)": EventFragment;
+    "Claimed(string,string)": EventFragment;
+    "Locked(uint256,string,string,address,uint256,string,string)": EventFragment;
+    "LogHash(bytes32,bytes[])": EventFragment;
+    "RewardValidator(address)": EventFragment;
+    "UnLock1155(address,uint256,address,uint256)": EventFragment;
+    "UnLock721(address,uint256,address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "AddNewValidator"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Claimed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Locked"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "LogHash"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RewardValidator"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UnLock1155"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UnLock721"): EventFragment;
 }
 
-export namespace AddNewValidatorEvent {
-  export type InputTuple = [_validator: AddressLike];
-  export type OutputTuple = [_validator: string];
-  export interface OutputObject {
-    _validator: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+export interface AddNewValidatorEventObject {
+  _validator: string;
 }
+export type AddNewValidatorEvent = TypedEvent<
+  [string],
+  AddNewValidatorEventObject
+>;
 
-export namespace ClaimedEvent {
-  export type InputTuple = [sourceChain: string, transactionHash: string];
-  export type OutputTuple = [sourceChain: string, transactionHash: string];
-  export interface OutputObject {
-    sourceChain: string;
-    transactionHash: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
+export type AddNewValidatorEventFilter = TypedEventFilter<AddNewValidatorEvent>;
 
-export namespace LockedEvent {
-  export type InputTuple = [
-    tokenId: BigNumberish,
-    destinationChain: string,
-    destinationUserAddress: string,
-    sourceNftContractAddress: AddressLike,
-    tokenAmount: BigNumberish,
-    nftType: string,
-    sourceChain: string
-  ];
-  export type OutputTuple = [
-    tokenId: bigint,
-    destinationChain: string,
-    destinationUserAddress: string,
-    sourceNftContractAddress: string,
-    tokenAmount: bigint,
-    nftType: string,
-    sourceChain: string
-  ];
-  export interface OutputObject {
-    tokenId: bigint;
-    destinationChain: string;
-    destinationUserAddress: string;
-    sourceNftContractAddress: string;
-    tokenAmount: bigint;
-    nftType: string;
-    sourceChain: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+export interface ClaimedEventObject {
+  sourceChain: string;
+  transactionHash: string;
 }
+export type ClaimedEvent = TypedEvent<[string, string], ClaimedEventObject>;
 
-export namespace LogHashEvent {
-  export type InputTuple = [hashValue: BytesLike, arg1: BytesLike[]];
-  export type OutputTuple = [hashValue: string, arg1: string[]];
-  export interface OutputObject {
-    hashValue: string;
-    arg1: string[];
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
+export type ClaimedEventFilter = TypedEventFilter<ClaimedEvent>;
 
-export namespace RewardValidatorEvent {
-  export type InputTuple = [_validator: AddressLike];
-  export type OutputTuple = [_validator: string];
-  export interface OutputObject {
-    _validator: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+export interface LockedEventObject {
+  tokenId: BigNumber;
+  destinationChain: string;
+  destinationUserAddress: string;
+  sourceNftContractAddress: string;
+  tokenAmount: BigNumber;
+  nftType: string;
+  sourceChain: string;
 }
+export type LockedEvent = TypedEvent<
+  [BigNumber, string, string, string, BigNumber, string, string],
+  LockedEventObject
+>;
 
-export namespace UnLock1155Event {
-  export type InputTuple = [
-    to: AddressLike,
-    tokenId: BigNumberish,
-    contractAddr: AddressLike,
-    amount: BigNumberish
-  ];
-  export type OutputTuple = [
-    to: string,
-    tokenId: bigint,
-    contractAddr: string,
-    amount: bigint
-  ];
-  export interface OutputObject {
-    to: string;
-    tokenId: bigint;
-    contractAddr: string;
-    amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
+export type LockedEventFilter = TypedEventFilter<LockedEvent>;
 
-export namespace UnLock721Event {
-  export type InputTuple = [
-    to: AddressLike,
-    tokenId: BigNumberish,
-    contractAddr: AddressLike
-  ];
-  export type OutputTuple = [to: string, tokenId: bigint, contractAddr: string];
-  export interface OutputObject {
-    to: string;
-    tokenId: bigint;
-    contractAddr: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+export interface LogHashEventObject {
+  hashValue: string;
+  arg1: string[];
 }
+export type LogHashEvent = TypedEvent<[string, string[]], LogHashEventObject>;
+
+export type LogHashEventFilter = TypedEventFilter<LogHashEvent>;
+
+export interface RewardValidatorEventObject {
+  _validator: string;
+}
+export type RewardValidatorEvent = TypedEvent<
+  [string],
+  RewardValidatorEventObject
+>;
+
+export type RewardValidatorEventFilter = TypedEventFilter<RewardValidatorEvent>;
+
+export interface UnLock1155EventObject {
+  to: string;
+  tokenId: BigNumber;
+  contractAddr: string;
+  amount: BigNumber;
+}
+export type UnLock1155Event = TypedEvent<
+  [string, BigNumber, string, BigNumber],
+  UnLock1155EventObject
+>;
+
+export type UnLock1155EventFilter = TypedEventFilter<UnLock1155Event>;
+
+export interface UnLock721EventObject {
+  to: string;
+  tokenId: BigNumber;
+  contractAddr: string;
+}
+export type UnLock721Event = TypedEvent<
+  [string, BigNumber, string],
+  UnLock721EventObject
+>;
+
+export type UnLock721EventFilter = TypedEventFilter<UnLock721Event>;
 
 export interface Bridge extends BaseContract {
-  connect(runner?: ContractRunner | null): Bridge;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: BridgeInterface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    addValidator(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+    claimNFT1155(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  addValidator: TypedContractMethod<
-    [_validator: AddressLike, signatures: BytesLike[]],
-    [void],
-    "nonpayable"
-  >;
+    claimNFT721(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  claimNFT1155: TypedContractMethod<
-    [data: Bridge.ClaimDataStruct, signatures: BytesLike[]],
-    [void],
-    "payable"
-  >;
+    claimValidatorRewards(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  claimNFT721: TypedContractMethod<
-    [data: Bridge.ClaimDataStruct, signatures: BytesLike[]],
-    [void],
-    "payable"
-  >;
+    collectionDeployer(overrides?: CallOverrides): Promise<[string]>;
 
-  claimValidatorRewards: TypedContractMethod<
-    [_validator: AddressLike, signatures: BytesLike[]],
-    [void],
-    "nonpayable"
-  >;
+    duplicateStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
-  collectionDeployer: TypedContractMethod<[], [string], "view">;
+    duplicateStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
-  duplicateStorageMapping1155: TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [string],
-    "view"
-  >;
+    duplicateToOriginalMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { chain: string; contractAddress: string }>;
 
-  duplicateStorageMapping721: TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [string],
-    "view"
-  >;
-
-  duplicateToOriginalMapping: TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [[string, string] & { chain: string; contractAddress: string }],
-    "view"
-  >;
-
-  lock1155: TypedContractMethod<
-    [
+    lock1155(
       tokenId: BigNumberish,
       destinationChain: string,
       destinationUserAddress: string,
-      sourceNftContractAddress: AddressLike,
-      tokenAmount: BigNumberish
-    ],
-    [void],
-    "nonpayable"
-  >;
+      sourceNftContractAddress: string,
+      tokenAmount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  lock721: TypedContractMethod<
-    [
+    lock721(
       tokenId: BigNumberish,
       destinationChain: string,
       destinationUserAddress: string,
-      sourceNftContractAddress: AddressLike
-    ],
-    [void],
-    "nonpayable"
+      sourceNftContractAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    originalStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    originalStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    originalToDuplicateMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { chain: string; contractAddress: string }>;
+
+    selfChain(overrides?: CallOverrides): Promise<[string]>;
+
+    storageDeployer(overrides?: CallOverrides): Promise<[string]>;
+
+    uniqueIdentifier(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    validators(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [boolean, BigNumber] & { added: boolean; pendingReward: BigNumber }
+    >;
+
+    validatorsCount(overrides?: CallOverrides): Promise<[BigNumber]>;
+  };
+
+  addValidator(
+    _validator: string,
+    signatures: BytesLike[],
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  claimNFT1155(
+    data: Bridge.ClaimDataStruct,
+    signatures: BytesLike[],
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  claimNFT721(
+    data: Bridge.ClaimDataStruct,
+    signatures: BytesLike[],
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  claimValidatorRewards(
+    _validator: string,
+    signatures: BytesLike[],
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  collectionDeployer(overrides?: CallOverrides): Promise<string>;
+
+  duplicateStorageMapping1155(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  duplicateStorageMapping721(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  duplicateToOriginalMapping(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<[string, string] & { chain: string; contractAddress: string }>;
+
+  lock1155(
+    tokenId: BigNumberish,
+    destinationChain: string,
+    destinationUserAddress: string,
+    sourceNftContractAddress: string,
+    tokenAmount: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  lock721(
+    tokenId: BigNumberish,
+    destinationChain: string,
+    destinationUserAddress: string,
+    sourceNftContractAddress: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  originalStorageMapping1155(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  originalStorageMapping721(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  originalToDuplicateMapping(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<[string, string] & { chain: string; contractAddress: string }>;
+
+  selfChain(overrides?: CallOverrides): Promise<string>;
+
+  storageDeployer(overrides?: CallOverrides): Promise<string>;
+
+  uniqueIdentifier(
+    arg0: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  validators(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<
+    [boolean, BigNumber] & { added: boolean; pendingReward: BigNumber }
   >;
 
-  originalStorageMapping1155: TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [string],
-    "view"
-  >;
+  validatorsCount(overrides?: CallOverrides): Promise<BigNumber>;
 
-  originalStorageMapping721: TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [string],
-    "view"
-  >;
+  callStatic: {
+    addValidator(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-  originalToDuplicateMapping: TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [[string, string] & { chain: string; contractAddress: string }],
-    "view"
-  >;
+    claimNFT1155(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-  selfChain: TypedContractMethod<[], [string], "view">;
+    claimNFT721(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-  storageDeployer: TypedContractMethod<[], [string], "view">;
+    claimValidatorRewards(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-  uniqueIdentifier: TypedContractMethod<[arg0: BytesLike], [boolean], "view">;
+    collectionDeployer(overrides?: CallOverrides): Promise<string>;
 
-  validators: TypedContractMethod<
-    [arg0: AddressLike],
-    [[boolean, bigint] & { added: boolean; pendingReward: bigint }],
-    "view"
-  >;
+    duplicateStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-  validatorsCount: TypedContractMethod<[], [bigint], "view">;
+    duplicateStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+    duplicateToOriginalMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { chain: string; contractAddress: string }>;
 
-  getFunction(
-    nameOrSignature: "addValidator"
-  ): TypedContractMethod<
-    [_validator: AddressLike, signatures: BytesLike[]],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "claimNFT1155"
-  ): TypedContractMethod<
-    [data: Bridge.ClaimDataStruct, signatures: BytesLike[]],
-    [void],
-    "payable"
-  >;
-  getFunction(
-    nameOrSignature: "claimNFT721"
-  ): TypedContractMethod<
-    [data: Bridge.ClaimDataStruct, signatures: BytesLike[]],
-    [void],
-    "payable"
-  >;
-  getFunction(
-    nameOrSignature: "claimValidatorRewards"
-  ): TypedContractMethod<
-    [_validator: AddressLike, signatures: BytesLike[]],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "collectionDeployer"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "duplicateStorageMapping1155"
-  ): TypedContractMethod<[arg0: AddressLike, arg1: string], [string], "view">;
-  getFunction(
-    nameOrSignature: "duplicateStorageMapping721"
-  ): TypedContractMethod<[arg0: AddressLike, arg1: string], [string], "view">;
-  getFunction(
-    nameOrSignature: "duplicateToOriginalMapping"
-  ): TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [[string, string] & { chain: string; contractAddress: string }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "lock1155"
-  ): TypedContractMethod<
-    [
+    lock1155(
       tokenId: BigNumberish,
       destinationChain: string,
       destinationUserAddress: string,
-      sourceNftContractAddress: AddressLike,
-      tokenAmount: BigNumberish
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "lock721"
-  ): TypedContractMethod<
-    [
+      sourceNftContractAddress: string,
+      tokenAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    lock721(
       tokenId: BigNumberish,
       destinationChain: string,
       destinationUserAddress: string,
-      sourceNftContractAddress: AddressLike
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "originalStorageMapping1155"
-  ): TypedContractMethod<[arg0: AddressLike, arg1: string], [string], "view">;
-  getFunction(
-    nameOrSignature: "originalStorageMapping721"
-  ): TypedContractMethod<[arg0: AddressLike, arg1: string], [string], "view">;
-  getFunction(
-    nameOrSignature: "originalToDuplicateMapping"
-  ): TypedContractMethod<
-    [arg0: AddressLike, arg1: string],
-    [[string, string] & { chain: string; contractAddress: string }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "selfChain"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "storageDeployer"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "uniqueIdentifier"
-  ): TypedContractMethod<[arg0: BytesLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "validators"
-  ): TypedContractMethod<
-    [arg0: AddressLike],
-    [[boolean, bigint] & { added: boolean; pendingReward: bigint }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "validatorsCount"
-  ): TypedContractMethod<[], [bigint], "view">;
+      sourceNftContractAddress: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-  getEvent(
-    key: "AddNewValidator"
-  ): TypedContractEvent<
-    AddNewValidatorEvent.InputTuple,
-    AddNewValidatorEvent.OutputTuple,
-    AddNewValidatorEvent.OutputObject
-  >;
-  getEvent(
-    key: "Claimed"
-  ): TypedContractEvent<
-    ClaimedEvent.InputTuple,
-    ClaimedEvent.OutputTuple,
-    ClaimedEvent.OutputObject
-  >;
-  getEvent(
-    key: "Locked"
-  ): TypedContractEvent<
-    LockedEvent.InputTuple,
-    LockedEvent.OutputTuple,
-    LockedEvent.OutputObject
-  >;
-  getEvent(
-    key: "LogHash"
-  ): TypedContractEvent<
-    LogHashEvent.InputTuple,
-    LogHashEvent.OutputTuple,
-    LogHashEvent.OutputObject
-  >;
-  getEvent(
-    key: "RewardValidator"
-  ): TypedContractEvent<
-    RewardValidatorEvent.InputTuple,
-    RewardValidatorEvent.OutputTuple,
-    RewardValidatorEvent.OutputObject
-  >;
-  getEvent(
-    key: "UnLock1155"
-  ): TypedContractEvent<
-    UnLock1155Event.InputTuple,
-    UnLock1155Event.OutputTuple,
-    UnLock1155Event.OutputObject
-  >;
-  getEvent(
-    key: "UnLock721"
-  ): TypedContractEvent<
-    UnLock721Event.InputTuple,
-    UnLock721Event.OutputTuple,
-    UnLock721Event.OutputObject
-  >;
+    originalStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    originalStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    originalToDuplicateMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { chain: string; contractAddress: string }>;
+
+    selfChain(overrides?: CallOverrides): Promise<string>;
+
+    storageDeployer(overrides?: CallOverrides): Promise<string>;
+
+    uniqueIdentifier(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    validators(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [boolean, BigNumber] & { added: boolean; pendingReward: BigNumber }
+    >;
+
+    validatorsCount(overrides?: CallOverrides): Promise<BigNumber>;
+  };
 
   filters: {
-    "AddNewValidator(address)": TypedContractEvent<
-      AddNewValidatorEvent.InputTuple,
-      AddNewValidatorEvent.OutputTuple,
-      AddNewValidatorEvent.OutputObject
-    >;
-    AddNewValidator: TypedContractEvent<
-      AddNewValidatorEvent.InputTuple,
-      AddNewValidatorEvent.OutputTuple,
-      AddNewValidatorEvent.OutputObject
-    >;
+    "AddNewValidator(address)"(_validator?: null): AddNewValidatorEventFilter;
+    AddNewValidator(_validator?: null): AddNewValidatorEventFilter;
 
-    "Claimed(string,string)": TypedContractEvent<
-      ClaimedEvent.InputTuple,
-      ClaimedEvent.OutputTuple,
-      ClaimedEvent.OutputObject
-    >;
-    Claimed: TypedContractEvent<
-      ClaimedEvent.InputTuple,
-      ClaimedEvent.OutputTuple,
-      ClaimedEvent.OutputObject
-    >;
+    "Claimed(string,string)"(
+      sourceChain?: null,
+      transactionHash?: null
+    ): ClaimedEventFilter;
+    Claimed(sourceChain?: null, transactionHash?: null): ClaimedEventFilter;
 
-    "Locked(uint256,string,string,address,uint256,string,string)": TypedContractEvent<
-      LockedEvent.InputTuple,
-      LockedEvent.OutputTuple,
-      LockedEvent.OutputObject
-    >;
-    Locked: TypedContractEvent<
-      LockedEvent.InputTuple,
-      LockedEvent.OutputTuple,
-      LockedEvent.OutputObject
-    >;
+    "Locked(uint256,string,string,address,uint256,string,string)"(
+      tokenId?: null,
+      destinationChain?: null,
+      destinationUserAddress?: null,
+      sourceNftContractAddress?: null,
+      tokenAmount?: null,
+      nftType?: null,
+      sourceChain?: null
+    ): LockedEventFilter;
+    Locked(
+      tokenId?: null,
+      destinationChain?: null,
+      destinationUserAddress?: null,
+      sourceNftContractAddress?: null,
+      tokenAmount?: null,
+      nftType?: null,
+      sourceChain?: null
+    ): LockedEventFilter;
 
-    "LogHash(bytes32,bytes[])": TypedContractEvent<
-      LogHashEvent.InputTuple,
-      LogHashEvent.OutputTuple,
-      LogHashEvent.OutputObject
-    >;
-    LogHash: TypedContractEvent<
-      LogHashEvent.InputTuple,
-      LogHashEvent.OutputTuple,
-      LogHashEvent.OutputObject
-    >;
+    "LogHash(bytes32,bytes[])"(
+      hashValue?: BytesLike | null,
+      arg1?: null
+    ): LogHashEventFilter;
+    LogHash(hashValue?: BytesLike | null, arg1?: null): LogHashEventFilter;
 
-    "RewardValidator(address)": TypedContractEvent<
-      RewardValidatorEvent.InputTuple,
-      RewardValidatorEvent.OutputTuple,
-      RewardValidatorEvent.OutputObject
-    >;
-    RewardValidator: TypedContractEvent<
-      RewardValidatorEvent.InputTuple,
-      RewardValidatorEvent.OutputTuple,
-      RewardValidatorEvent.OutputObject
-    >;
+    "RewardValidator(address)"(_validator?: null): RewardValidatorEventFilter;
+    RewardValidator(_validator?: null): RewardValidatorEventFilter;
 
-    "UnLock1155(address,uint256,address,uint256)": TypedContractEvent<
-      UnLock1155Event.InputTuple,
-      UnLock1155Event.OutputTuple,
-      UnLock1155Event.OutputObject
-    >;
-    UnLock1155: TypedContractEvent<
-      UnLock1155Event.InputTuple,
-      UnLock1155Event.OutputTuple,
-      UnLock1155Event.OutputObject
-    >;
+    "UnLock1155(address,uint256,address,uint256)"(
+      to?: null,
+      tokenId?: null,
+      contractAddr?: null,
+      amount?: null
+    ): UnLock1155EventFilter;
+    UnLock1155(
+      to?: null,
+      tokenId?: null,
+      contractAddr?: null,
+      amount?: null
+    ): UnLock1155EventFilter;
 
-    "UnLock721(address,uint256,address)": TypedContractEvent<
-      UnLock721Event.InputTuple,
-      UnLock721Event.OutputTuple,
-      UnLock721Event.OutputObject
-    >;
-    UnLock721: TypedContractEvent<
-      UnLock721Event.InputTuple,
-      UnLock721Event.OutputTuple,
-      UnLock721Event.OutputObject
-    >;
+    "UnLock721(address,uint256,address)"(
+      to?: null,
+      tokenId?: null,
+      contractAddr?: null
+    ): UnLock721EventFilter;
+    UnLock721(
+      to?: null,
+      tokenId?: null,
+      contractAddr?: null
+    ): UnLock721EventFilter;
+  };
+
+  estimateGas: {
+    addValidator(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    claimNFT1155(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    claimNFT721(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    claimValidatorRewards(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    collectionDeployer(overrides?: CallOverrides): Promise<BigNumber>;
+
+    duplicateStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    duplicateStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    duplicateToOriginalMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    lock1155(
+      tokenId: BigNumberish,
+      destinationChain: string,
+      destinationUserAddress: string,
+      sourceNftContractAddress: string,
+      tokenAmount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    lock721(
+      tokenId: BigNumberish,
+      destinationChain: string,
+      destinationUserAddress: string,
+      sourceNftContractAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    originalStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    originalStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    originalToDuplicateMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    selfChain(overrides?: CallOverrides): Promise<BigNumber>;
+
+    storageDeployer(overrides?: CallOverrides): Promise<BigNumber>;
+
+    uniqueIdentifier(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    validators(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    validatorsCount(overrides?: CallOverrides): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    addValidator(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    claimNFT1155(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    claimNFT721(
+      data: Bridge.ClaimDataStruct,
+      signatures: BytesLike[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    claimValidatorRewards(
+      _validator: string,
+      signatures: BytesLike[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    collectionDeployer(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    duplicateStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    duplicateStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    duplicateToOriginalMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    lock1155(
+      tokenId: BigNumberish,
+      destinationChain: string,
+      destinationUserAddress: string,
+      sourceNftContractAddress: string,
+      tokenAmount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    lock721(
+      tokenId: BigNumberish,
+      destinationChain: string,
+      destinationUserAddress: string,
+      sourceNftContractAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    originalStorageMapping1155(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    originalStorageMapping721(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    originalToDuplicateMapping(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    selfChain(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    storageDeployer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    uniqueIdentifier(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    validators(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    validatorsCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

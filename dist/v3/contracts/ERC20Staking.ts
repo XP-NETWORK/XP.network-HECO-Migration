@@ -3,36 +3,43 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumberish,
+  BigNumber,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  EventFragment,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
-  TypedLogDescription,
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type {
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../common";
 
-export interface ERC20StakingInterface extends Interface {
+export interface ERC20StakingInterface extends utils.Interface {
+  functions: {
+    "ERC20Token()": FunctionFragment;
+    "stakeERC20()": FunctionFragment;
+    "stakingAmount()": FunctionFragment;
+    "stakingBalances(address)": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "ERC20Token"
       | "stakeERC20"
       | "stakingAmount"
       | "stakingBalances"
   ): FunctionFragment;
-
-  getEvent(nameOrSignatureOrTopic: "Staked"): EventFragment;
 
   encodeFunctionData(
     functionFragment: "ERC20Token",
@@ -48,7 +55,7 @@ export interface ERC20StakingInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "stakingBalances",
-    values: [AddressLike]
+    values: [string]
   ): string;
 
   decodeFunctionResult(functionFragment: "ERC20Token", data: BytesLike): Result;
@@ -61,107 +68,119 @@ export interface ERC20StakingInterface extends Interface {
     functionFragment: "stakingBalances",
     data: BytesLike
   ): Result;
+
+  events: {
+    "Staked(address,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "Staked"): EventFragment;
 }
 
-export namespace StakedEvent {
-  export type InputTuple = [user: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [user: string, amount: bigint];
-  export interface OutputObject {
-    user: string;
-    amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+export interface StakedEventObject {
+  user: string;
+  amount: BigNumber;
 }
+export type StakedEvent = TypedEvent<[string, BigNumber], StakedEventObject>;
+
+export type StakedEventFilter = TypedEventFilter<StakedEvent>;
 
 export interface ERC20Staking extends BaseContract {
-  connect(runner?: ContractRunner | null): ERC20Staking;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: ERC20StakingInterface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    ERC20Token(overrides?: CallOverrides): Promise<[string]>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+    stakeERC20(
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  ERC20Token: TypedContractMethod<[], [string], "view">;
+    stakingAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-  stakeERC20: TypedContractMethod<[], [void], "nonpayable">;
+    stakingBalances(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+  };
 
-  stakingAmount: TypedContractMethod<[], [bigint], "view">;
+  ERC20Token(overrides?: CallOverrides): Promise<string>;
 
-  stakingBalances: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  stakeERC20(
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  stakingAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-  getFunction(
-    nameOrSignature: "ERC20Token"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "stakeERC20"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "stakingAmount"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "stakingBalances"
-  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  stakingBalances(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  getEvent(
-    key: "Staked"
-  ): TypedContractEvent<
-    StakedEvent.InputTuple,
-    StakedEvent.OutputTuple,
-    StakedEvent.OutputObject
-  >;
+  callStatic: {
+    ERC20Token(overrides?: CallOverrides): Promise<string>;
+
+    stakeERC20(overrides?: CallOverrides): Promise<void>;
+
+    stakingAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    stakingBalances(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+  };
 
   filters: {
-    "Staked(address,uint256)": TypedContractEvent<
-      StakedEvent.InputTuple,
-      StakedEvent.OutputTuple,
-      StakedEvent.OutputObject
-    >;
-    Staked: TypedContractEvent<
-      StakedEvent.InputTuple,
-      StakedEvent.OutputTuple,
-      StakedEvent.OutputObject
-    >;
+    "Staked(address,uint256)"(
+      user?: string | null,
+      amount?: null
+    ): StakedEventFilter;
+    Staked(user?: string | null, amount?: null): StakedEventFilter;
+  };
+
+  estimateGas: {
+    ERC20Token(overrides?: CallOverrides): Promise<BigNumber>;
+
+    stakeERC20(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
+
+    stakingAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    stakingBalances(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    ERC20Token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    stakeERC20(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    stakingAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    stakingBalances(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
   };
 }

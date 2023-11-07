@@ -2,7 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Interface, type ContractRunner } from "ethers";
+import { Contract, Signer, utils } from "ethers";
+import type { Provider } from "@ethersproject/providers";
 import type {
   INFTStorageERC1155,
   INFTStorageERC1155Interface,
@@ -81,12 +82,12 @@ const _abi = [
 export class INFTStorageERC1155__factory {
   static readonly abi = _abi;
   static createInterface(): INFTStorageERC1155Interface {
-    return new Interface(_abi) as INFTStorageERC1155Interface;
+    return new utils.Interface(_abi) as INFTStorageERC1155Interface;
   }
   static connect(
     address: string,
-    runner?: ContractRunner | null
+    signerOrProvider: Signer | Provider
   ): INFTStorageERC1155 {
-    return new Contract(address, _abi, runner) as unknown as INFTStorageERC1155;
+    return new Contract(address, _abi, signerOrProvider) as INFTStorageERC1155;
   }
 }

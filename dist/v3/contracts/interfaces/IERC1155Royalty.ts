@@ -3,27 +3,36 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumber,
   BigNumberish,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../../common";
 
-export interface IERC1155RoyaltyInterface extends Interface {
+export interface IERC1155RoyaltyInterface extends utils.Interface {
+  functions: {
+    "balanceOf(address,uint256)": FunctionFragment;
+    "mint(address,uint256,uint256,uint256,address,string)": FunctionFragment;
+    "royaltyInfo(uint256,uint256)": FunctionFragment;
+    "setTokenURI(uint256,string)": FunctionFragment;
+    "uri(uint256)": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "balanceOf"
       | "mint"
       | "royaltyInfo"
@@ -33,18 +42,11 @@ export interface IERC1155RoyaltyInterface extends Interface {
 
   encodeFunctionData(
     functionFragment: "balanceOf",
-    values: [AddressLike, BigNumberish]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "mint",
-    values: [
-      AddressLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      AddressLike,
-      string
-    ]
+    values: [string, BigNumberish, BigNumberish, BigNumberish, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "royaltyInfo",
@@ -67,126 +69,202 @@ export interface IERC1155RoyaltyInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
+
+  events: {};
 }
 
 export interface IERC1155Royalty extends BaseContract {
-  connect(runner?: ContractRunner | null): IERC1155Royalty;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: IERC1155RoyaltyInterface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    balanceOf(
+      account: string,
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
-
-  balanceOf: TypedContractMethod<
-    [account: AddressLike, id: BigNumberish],
-    [bigint],
-    "view"
-  >;
-
-  mint: TypedContractMethod<
-    [
-      account: AddressLike,
+    mint(
+      account: string,
       id: BigNumberish,
       amount: BigNumberish,
       royalty: BigNumberish,
-      royaltyReceiver: AddressLike,
-      tokenURI: string
-    ],
-    [void],
-    "nonpayable"
+      royaltyReceiver: string,
+      tokenURI: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    royaltyInfo(
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber] & { receiver: string; royaltyAmount: BigNumber }
+    >;
+
+    setTokenURI(
+      tokenId: BigNumberish,
+      newTokenURI: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    uri(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+  };
+
+  balanceOf(
+    account: string,
+    id: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  mint(
+    account: string,
+    id: BigNumberish,
+    amount: BigNumberish,
+    royalty: BigNumberish,
+    royaltyReceiver: string,
+    tokenURI: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  royaltyInfo(
+    tokenId: BigNumberish,
+    salePrice: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, BigNumber] & { receiver: string; royaltyAmount: BigNumber }
   >;
 
-  royaltyInfo: TypedContractMethod<
-    [tokenId: BigNumberish, salePrice: BigNumberish],
-    [[string, bigint] & { receiver: string; royaltyAmount: bigint }],
-    "view"
-  >;
+  setTokenURI(
+    tokenId: BigNumberish,
+    newTokenURI: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  setTokenURI: TypedContractMethod<
-    [tokenId: BigNumberish, newTokenURI: string],
-    [void],
-    "nonpayable"
-  >;
+  uri(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-  uri: TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
+  callStatic: {
+    balanceOf(
+      account: string,
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
-
-  getFunction(
-    nameOrSignature: "balanceOf"
-  ): TypedContractMethod<
-    [account: AddressLike, id: BigNumberish],
-    [bigint],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "mint"
-  ): TypedContractMethod<
-    [
-      account: AddressLike,
+    mint(
+      account: string,
       id: BigNumberish,
       amount: BigNumberish,
       royalty: BigNumberish,
-      royaltyReceiver: AddressLike,
-      tokenURI: string
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "royaltyInfo"
-  ): TypedContractMethod<
-    [tokenId: BigNumberish, salePrice: BigNumberish],
-    [[string, bigint] & { receiver: string; royaltyAmount: bigint }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "setTokenURI"
-  ): TypedContractMethod<
-    [tokenId: BigNumberish, newTokenURI: string],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "uri"
-  ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
+      royaltyReceiver: string,
+      tokenURI: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    royaltyInfo(
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber] & { receiver: string; royaltyAmount: BigNumber }
+    >;
+
+    setTokenURI(
+      tokenId: BigNumberish,
+      newTokenURI: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    uri(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+  };
 
   filters: {};
+
+  estimateGas: {
+    balanceOf(
+      account: string,
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    mint(
+      account: string,
+      id: BigNumberish,
+      amount: BigNumberish,
+      royalty: BigNumberish,
+      royaltyReceiver: string,
+      tokenURI: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    royaltyInfo(
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    setTokenURI(
+      tokenId: BigNumberish,
+      newTokenURI: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    uri(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    balanceOf(
+      account: string,
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    mint(
+      account: string,
+      id: BigNumberish,
+      amount: BigNumberish,
+      royalty: BigNumberish,
+      royaltyReceiver: string,
+      tokenURI: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    royaltyInfo(
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setTokenURI(
+      tokenId: BigNumberish,
+      newTokenURI: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    uri(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+  };
 }

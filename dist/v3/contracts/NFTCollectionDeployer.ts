@@ -3,35 +3,43 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumber,
   BytesLike,
-  FunctionFragment,
-  Result,
-  Interface,
-  EventFragment,
-  AddressLike,
-  ContractRunner,
-  ContractMethod,
-  Listener,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
 } from "ethers";
 import type {
-  TypedContractEvent,
-  TypedDeferredTopicFilter,
-  TypedEventLog,
-  TypedLogDescription,
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type {
+  TypedEventFilter,
+  TypedEvent,
   TypedListener,
-  TypedContractMethod,
+  OnEvent,
 } from "../common";
 
-export interface NFTCollectionDeployerInterface extends Interface {
+export interface NFTCollectionDeployerInterface extends utils.Interface {
+  functions: {
+    "deployNFT1155Collection()": FunctionFragment;
+    "deployNFT721Collection(string,string)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "setOwner(address)": FunctionFragment;
+  };
+
   getFunction(
-    nameOrSignature:
+    nameOrSignatureOrTopic:
       | "deployNFT1155Collection"
       | "deployNFT721Collection"
       | "owner"
       | "setOwner"
   ): FunctionFragment;
-
-  getEvent(nameOrSignatureOrTopic: "CreatedCollection"): EventFragment;
 
   encodeFunctionData(
     functionFragment: "deployNFT1155Collection",
@@ -42,10 +50,7 @@ export interface NFTCollectionDeployerInterface extends Interface {
     values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "setOwner",
-    values: [AddressLike]
-  ): string;
+  encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
 
   decodeFunctionResult(
     functionFragment: "deployNFT1155Collection",
@@ -57,114 +62,143 @@ export interface NFTCollectionDeployerInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
+
+  events: {
+    "CreatedCollection(address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "CreatedCollection"): EventFragment;
 }
 
-export namespace CreatedCollectionEvent {
-  export type InputTuple = [collectionAddress: AddressLike];
-  export type OutputTuple = [collectionAddress: string];
-  export interface OutputObject {
-    collectionAddress: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+export interface CreatedCollectionEventObject {
+  collectionAddress: string;
 }
+export type CreatedCollectionEvent = TypedEvent<
+  [string],
+  CreatedCollectionEventObject
+>;
+
+export type CreatedCollectionEventFilter =
+  TypedEventFilter<CreatedCollectionEvent>;
 
 export interface NFTCollectionDeployer extends BaseContract {
-  connect(runner?: ContractRunner | null): NFTCollectionDeployer;
-  waitForDeployment(): Promise<this>;
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
   interface: NFTCollectionDeployerInterface;
 
-  queryFilter<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
-  queryFilter<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  ): Promise<Array<TEvent>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  on<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
-  once<TCEvent extends TypedContractEvent>(
-    filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  functions: {
+    deployNFT1155Collection(
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+    deployNFT721Collection(
+      name: string,
+      symbol: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-  deployNFT1155Collection: TypedContractMethod<[], [string], "nonpayable">;
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
-  deployNFT721Collection: TypedContractMethod<
-    [name: string, symbol: string],
-    [string],
-    "nonpayable"
-  >;
+    setOwner(
+      _owner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+  };
 
-  owner: TypedContractMethod<[], [string], "view">;
+  deployNFT1155Collection(
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  setOwner: TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+  deployNFT721Collection(
+    name: string,
+    symbol: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  owner(overrides?: CallOverrides): Promise<string>;
 
-  getFunction(
-    nameOrSignature: "deployNFT1155Collection"
-  ): TypedContractMethod<[], [string], "nonpayable">;
-  getFunction(
-    nameOrSignature: "deployNFT721Collection"
-  ): TypedContractMethod<
-    [name: string, symbol: string],
-    [string],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "owner"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "setOwner"
-  ): TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+  setOwner(
+    _owner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  getEvent(
-    key: "CreatedCollection"
-  ): TypedContractEvent<
-    CreatedCollectionEvent.InputTuple,
-    CreatedCollectionEvent.OutputTuple,
-    CreatedCollectionEvent.OutputObject
-  >;
+  callStatic: {
+    deployNFT1155Collection(overrides?: CallOverrides): Promise<string>;
+
+    deployNFT721Collection(
+      name: string,
+      symbol: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    setOwner(_owner: string, overrides?: CallOverrides): Promise<void>;
+  };
 
   filters: {
-    "CreatedCollection(address)": TypedContractEvent<
-      CreatedCollectionEvent.InputTuple,
-      CreatedCollectionEvent.OutputTuple,
-      CreatedCollectionEvent.OutputObject
-    >;
-    CreatedCollection: TypedContractEvent<
-      CreatedCollectionEvent.InputTuple,
-      CreatedCollectionEvent.OutputTuple,
-      CreatedCollectionEvent.OutputObject
-    >;
+    "CreatedCollection(address)"(
+      collectionAddress?: null
+    ): CreatedCollectionEventFilter;
+    CreatedCollection(collectionAddress?: null): CreatedCollectionEventFilter;
+  };
+
+  estimateGas: {
+    deployNFT1155Collection(
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    deployNFT721Collection(
+      name: string,
+      symbol: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setOwner(
+      _owner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    deployNFT1155Collection(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    deployNFT721Collection(
+      name: string,
+      symbol: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setOwner(
+      _owner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
   };
 }
