@@ -25,10 +25,20 @@ import type {
   OnEvent,
 } from "../common";
 
+export type ValidatorAddressAndChainTypeStruct = {
+  validatorAddress: string;
+  chainType: string;
+};
+
+export type ValidatorAddressAndChainTypeStructOutput = [string, string] & {
+  validatorAddress: string;
+  chainType: string;
+};
+
 export interface ERC20StakingInterface extends utils.Interface {
   functions: {
     "ERC20Token()": FunctionFragment;
-    "stakeERC20()": FunctionFragment;
+    "stakeERC20((string,string)[])": FunctionFragment;
     "stakingAmount()": FunctionFragment;
     "stakingBalances(address)": FunctionFragment;
   };
@@ -47,7 +57,7 @@ export interface ERC20StakingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "stakeERC20",
-    values?: undefined
+    values: [ValidatorAddressAndChainTypeStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "stakingAmount",
@@ -70,17 +80,20 @@ export interface ERC20StakingInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "Staked(address,uint256)": EventFragment;
+    "Staked(uint256,(string,string)[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Staked"): EventFragment;
 }
 
 export interface StakedEventObject {
-  user: string;
   amount: BigNumber;
+  validatorAddressAndChainType: ValidatorAddressAndChainTypeStructOutput[];
 }
-export type StakedEvent = TypedEvent<[string, BigNumber], StakedEventObject>;
+export type StakedEvent = TypedEvent<
+  [BigNumber, ValidatorAddressAndChainTypeStructOutput[]],
+  StakedEventObject
+>;
 
 export type StakedEventFilter = TypedEventFilter<StakedEvent>;
 
@@ -114,6 +127,7 @@ export interface ERC20Staking extends BaseContract {
     ERC20Token(overrides?: CallOverrides): Promise<[string]>;
 
     stakeERC20(
+      _validatorAddressAndChainType: ValidatorAddressAndChainTypeStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -128,6 +142,7 @@ export interface ERC20Staking extends BaseContract {
   ERC20Token(overrides?: CallOverrides): Promise<string>;
 
   stakeERC20(
+    _validatorAddressAndChainType: ValidatorAddressAndChainTypeStruct[],
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -138,7 +153,10 @@ export interface ERC20Staking extends BaseContract {
   callStatic: {
     ERC20Token(overrides?: CallOverrides): Promise<string>;
 
-    stakeERC20(overrides?: CallOverrides): Promise<void>;
+    stakeERC20(
+      _validatorAddressAndChainType: ValidatorAddressAndChainTypeStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     stakingAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -149,17 +167,23 @@ export interface ERC20Staking extends BaseContract {
   };
 
   filters: {
-    "Staked(address,uint256)"(
-      user?: string | null,
-      amount?: null
+    "Staked(uint256,(string,string)[])"(
+      amount?: null,
+      validatorAddressAndChainType?: null
     ): StakedEventFilter;
-    Staked(user?: string | null, amount?: null): StakedEventFilter;
+    Staked(
+      amount?: null,
+      validatorAddressAndChainType?: null
+    ): StakedEventFilter;
   };
 
   estimateGas: {
     ERC20Token(overrides?: CallOverrides): Promise<BigNumber>;
 
-    stakeERC20(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
+    stakeERC20(
+      _validatorAddressAndChainType: ValidatorAddressAndChainTypeStruct[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
 
     stakingAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -173,6 +197,7 @@ export interface ERC20Staking extends BaseContract {
     ERC20Token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     stakeERC20(
+      _validatorAddressAndChainType: ValidatorAddressAndChainTypeStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

@@ -26,6 +26,7 @@ export interface IERC1155RoyaltyInterface extends utils.Interface {
   functions: {
     "balanceOf(address,uint256)": FunctionFragment;
     "mint(address,uint256,uint256,uint256,address,string)": FunctionFragment;
+    "owner()": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "setTokenURI(uint256,string)": FunctionFragment;
     "uri(uint256)": FunctionFragment;
@@ -35,6 +36,7 @@ export interface IERC1155RoyaltyInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "balanceOf"
       | "mint"
+      | "owner"
       | "royaltyInfo"
       | "setTokenURI"
       | "uri"
@@ -48,6 +50,7 @@ export interface IERC1155RoyaltyInterface extends utils.Interface {
     functionFragment: "mint",
     values: [string, BigNumberish, BigNumberish, BigNumberish, string, string]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "royaltyInfo",
     values: [BigNumberish, BigNumberish]
@@ -60,6 +63,7 @@ export interface IERC1155RoyaltyInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "royaltyInfo",
     data: BytesLike
@@ -116,6 +120,8 @@ export interface IERC1155Royalty extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
     royaltyInfo(
       tokenId: BigNumberish,
       salePrice: BigNumberish,
@@ -149,6 +155,8 @@ export interface IERC1155Royalty extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  owner(overrides?: CallOverrides): Promise<string>;
+
   royaltyInfo(
     tokenId: BigNumberish,
     salePrice: BigNumberish,
@@ -181,6 +189,8 @@ export interface IERC1155Royalty extends BaseContract {
       tokenURI: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
 
     royaltyInfo(
       tokenId: BigNumberish,
@@ -218,6 +228,8 @@ export interface IERC1155Royalty extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
     royaltyInfo(
       tokenId: BigNumberish,
       salePrice: BigNumberish,
@@ -249,6 +261,8 @@ export interface IERC1155Royalty extends BaseContract {
       tokenURI: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     royaltyInfo(
       tokenId: BigNumberish,

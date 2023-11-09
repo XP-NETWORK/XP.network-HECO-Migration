@@ -22,40 +22,63 @@ import type {
   OnEvent,
 } from "../common";
 
-export type ChainFeeStruct = { chain: string; fee: BigNumberish };
+export type ChainFeeStruct = {
+  chain: string;
+  fee: BigNumberish;
+  royaltyReceiver: string;
+};
 
-export type ChainFeeStructOutput = [string, BigNumber] & {
+export type ChainFeeStructOutput = [string, BigNumber, string] & {
   chain: string;
   fee: BigNumber;
+  royaltyReceiver: string;
 };
 
 export type SignerAndSignatureStruct = {
-  publicAddress: string;
-  signature: string;
+  signerAddress: string;
+  signature: BytesLike;
 };
 
 export type SignerAndSignatureStructOutput = [string, string] & {
-  publicAddress: string;
+  signerAddress: string;
   signature: string;
+};
+
+export type ValidatorAddressWithSignerAndSignatureStruct = {
+  validatorAddress: string;
+  signerAndSignature: SignerAndSignatureStruct;
+};
+
+export type ValidatorAddressWithSignerAndSignatureStructOutput = [
+  string,
+  SignerAndSignatureStructOutput
+] & {
+  validatorAddress: string;
+  signerAndSignature: SignerAndSignatureStructOutput;
 };
 
 export interface BridgeStorageInterface extends utils.Interface {
   functions: {
-    "approveLockNft(string,string,string)": FunctionFragment;
-    "approveStake(address,string)": FunctionFragment;
+    "approveLockNft(string,string,bytes,string)": FunctionFragment;
+    "approveStake(address,(string,(string,bytes))[])": FunctionFragment;
     "chainEpoch(string)": FunctionFragment;
     "chainFee(string)": FunctionFragment;
     "chainFeeVoted(string,uint256,address,uint256)": FunctionFragment;
     "chainFeeVotes(string,uint256,uint256)": FunctionFragment;
+    "chainRoyalty(string)": FunctionFragment;
+    "chainRoyaltyVoted(string,string,address,uint256)": FunctionFragment;
+    "chainRoyaltyVotes(string,string,uint256)": FunctionFragment;
     "changeChainFee(string,uint256)": FunctionFragment;
+    "changeChainRoyaltyReceiver(string,string)": FunctionFragment;
     "changeValidatorStatus(address,bool)": FunctionFragment;
     "getLockNftSignatures(string,string)": FunctionFragment;
     "getLockNftSignaturesCount(string,string)": FunctionFragment;
-    "getStakingSignatures(address)": FunctionFragment;
-    "getStakingSignaturesCount(address)": FunctionFragment;
+    "getStakingSignatures(string)": FunctionFragment;
+    "getStakingSignaturesCount(string)": FunctionFragment;
     "lockSignatures(string,string,uint256)": FunctionFragment;
-    "stakingSignatures(address,uint256)": FunctionFragment;
-    "usedSignatures(string)": FunctionFragment;
+    "royaltyEpoch(string)": FunctionFragment;
+    "stakingSignatures(string,uint256)": FunctionFragment;
+    "usedSignatures(bytes)": FunctionFragment;
     "validatorCount()": FunctionFragment;
     "validatorEpoch(address)": FunctionFragment;
     "validatorStatusChangeVotes(address,bool,uint256)": FunctionFragment;
@@ -71,13 +94,18 @@ export interface BridgeStorageInterface extends utils.Interface {
       | "chainFee"
       | "chainFeeVoted"
       | "chainFeeVotes"
+      | "chainRoyalty"
+      | "chainRoyaltyVoted"
+      | "chainRoyaltyVotes"
       | "changeChainFee"
+      | "changeChainRoyaltyReceiver"
       | "changeValidatorStatus"
       | "getLockNftSignatures"
       | "getLockNftSignaturesCount"
       | "getStakingSignatures"
       | "getStakingSignaturesCount"
       | "lockSignatures"
+      | "royaltyEpoch"
       | "stakingSignatures"
       | "usedSignatures"
       | "validatorCount"
@@ -89,11 +117,11 @@ export interface BridgeStorageInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "approveLockNft",
-    values: [string, string, string]
+    values: [string, string, BytesLike, string]
   ): string;
   encodeFunctionData(
     functionFragment: "approveStake",
-    values: [string, string]
+    values: [string, ValidatorAddressWithSignerAndSignatureStruct[]]
   ): string;
   encodeFunctionData(functionFragment: "chainEpoch", values: [string]): string;
   encodeFunctionData(functionFragment: "chainFee", values: [string]): string;
@@ -106,8 +134,24 @@ export interface BridgeStorageInterface extends utils.Interface {
     values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "chainRoyalty",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "chainRoyaltyVoted",
+    values: [string, string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "chainRoyaltyVotes",
+    values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "changeChainFee",
     values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeChainRoyaltyReceiver",
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "changeValidatorStatus",
@@ -134,12 +178,16 @@ export interface BridgeStorageInterface extends utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "royaltyEpoch",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "stakingSignatures",
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "usedSignatures",
-    values: [string]
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "validatorCount",
@@ -178,7 +226,23 @@ export interface BridgeStorageInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "chainRoyalty",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "chainRoyaltyVoted",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "chainRoyaltyVotes",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "changeChainFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeChainRoyaltyReceiver",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -203,6 +267,10 @@ export interface BridgeStorageInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "lockSignatures",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "royaltyEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -264,13 +332,14 @@ export interface BridgeStorage extends BaseContract {
     approveLockNft(
       _transactionHash: string,
       _chain: string,
-      _signature: string,
+      _signature: BytesLike,
+      _signerAddress: string,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     approveStake(
       _stakerAddress: string,
-      _signature: string,
+      _validatorAddressWithSignerAndSignature: ValidatorAddressWithSignerAndSignatureStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -293,9 +362,32 @@ export interface BridgeStorage extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    chainRoyalty(arg0: string, overrides?: CallOverrides): Promise<[string]>;
+
+    chainRoyaltyVoted(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    chainRoyaltyVotes(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     changeChainFee(
       _chain: string,
       _fee: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    changeChainRoyaltyReceiver(
+      _chain: string,
+      _royaltyReceiver: string,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -332,15 +424,20 @@ export interface BridgeStorage extends BaseContract {
       arg1: string,
       arg2: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+    ): Promise<[string, string] & { signerAddress: string; signature: string }>;
+
+    royaltyEpoch(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     stakingSignatures(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+    ): Promise<[string, string] & { signerAddress: string; signature: string }>;
 
-    usedSignatures(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+    usedSignatures(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     validatorCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -369,13 +466,14 @@ export interface BridgeStorage extends BaseContract {
   approveLockNft(
     _transactionHash: string,
     _chain: string,
-    _signature: string,
+    _signature: BytesLike,
+    _signerAddress: string,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   approveStake(
     _stakerAddress: string,
-    _signature: string,
+    _validatorAddressWithSignerAndSignature: ValidatorAddressWithSignerAndSignatureStruct[],
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -398,9 +496,32 @@ export interface BridgeStorage extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  chainRoyalty(arg0: string, overrides?: CallOverrides): Promise<string>;
+
+  chainRoyaltyVoted(
+    arg0: string,
+    arg1: string,
+    arg2: string,
+    arg3: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  chainRoyaltyVotes(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   changeChainFee(
     _chain: string,
     _fee: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  changeChainRoyaltyReceiver(
+    _chain: string,
+    _royaltyReceiver: string,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -437,15 +558,17 @@ export interface BridgeStorage extends BaseContract {
     arg1: string,
     arg2: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+  ): Promise<[string, string] & { signerAddress: string; signature: string }>;
+
+  royaltyEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   stakingSignatures(
     arg0: string,
     arg1: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+  ): Promise<[string, string] & { signerAddress: string; signature: string }>;
 
-  usedSignatures(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+  usedSignatures(arg0: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
   validatorCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -471,13 +594,14 @@ export interface BridgeStorage extends BaseContract {
     approveLockNft(
       _transactionHash: string,
       _chain: string,
-      _signature: string,
+      _signature: BytesLike,
+      _signerAddress: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
     approveStake(
       _stakerAddress: string,
-      _signature: string,
+      _validatorAddressWithSignerAndSignature: ValidatorAddressWithSignerAndSignatureStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -500,9 +624,32 @@ export interface BridgeStorage extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    chainRoyalty(arg0: string, overrides?: CallOverrides): Promise<string>;
+
+    chainRoyaltyVoted(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    chainRoyaltyVotes(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     changeChainFee(
       _chain: string,
       _fee: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    changeChainRoyaltyReceiver(
+      _chain: string,
+      _royaltyReceiver: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -539,15 +686,20 @@ export interface BridgeStorage extends BaseContract {
       arg1: string,
       arg2: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+    ): Promise<[string, string] & { signerAddress: string; signature: string }>;
+
+    royaltyEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     stakingSignatures(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string, string] & { publicAddress: string; signature: string }>;
+    ): Promise<[string, string] & { signerAddress: string; signature: string }>;
 
-    usedSignatures(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+    usedSignatures(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     validatorCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -576,13 +728,14 @@ export interface BridgeStorage extends BaseContract {
     approveLockNft(
       _transactionHash: string,
       _chain: string,
-      _signature: string,
+      _signature: BytesLike,
+      _signerAddress: string,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     approveStake(
       _stakerAddress: string,
-      _signature: string,
+      _validatorAddressWithSignerAndSignature: ValidatorAddressWithSignerAndSignatureStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -605,9 +758,32 @@ export interface BridgeStorage extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    chainRoyalty(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    chainRoyaltyVoted(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    chainRoyaltyVotes(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     changeChainFee(
       _chain: string,
       _fee: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    changeChainRoyaltyReceiver(
+      _chain: string,
+      _royaltyReceiver: string,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -646,13 +822,18 @@ export interface BridgeStorage extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    royaltyEpoch(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     stakingSignatures(
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    usedSignatures(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    usedSignatures(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     validatorCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -679,13 +860,14 @@ export interface BridgeStorage extends BaseContract {
     approveLockNft(
       _transactionHash: string,
       _chain: string,
-      _signature: string,
+      _signature: BytesLike,
+      _signerAddress: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     approveStake(
       _stakerAddress: string,
-      _signature: string,
+      _validatorAddressWithSignerAndSignature: ValidatorAddressWithSignerAndSignatureStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -714,9 +896,35 @@ export interface BridgeStorage extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    chainRoyalty(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    chainRoyaltyVoted(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    chainRoyaltyVotes(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     changeChainFee(
       _chain: string,
       _fee: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    changeChainRoyaltyReceiver(
+      _chain: string,
+      _royaltyReceiver: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -755,6 +963,11 @@ export interface BridgeStorage extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    royaltyEpoch(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     stakingSignatures(
       arg0: string,
       arg1: BigNumberish,
@@ -762,7 +975,7 @@ export interface BridgeStorage extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     usedSignatures(
-      arg0: string,
+      arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

@@ -27,6 +27,16 @@ import type {
   OnEvent,
 } from "../common";
 
+export type SignerAndSignatureStruct = {
+  signerAddress: string;
+  signature: BytesLike;
+};
+
+export type SignerAndSignatureStructOutput = [string, string] & {
+  signerAddress: string;
+  signature: string;
+};
+
 export declare namespace Bridge {
   export type ClaimDataStruct = {
     tokenId: BigNumberish;
@@ -80,19 +90,19 @@ export declare namespace Bridge {
 
 export interface BridgeInterface extends utils.Interface {
   functions: {
-    "addValidator(address,bytes[])": FunctionFragment;
-    "claimNFT1155((uint256,string,string,address,address,string,string,uint256,address,string,string,uint256,string,uint256),bytes[])": FunctionFragment;
-    "claimNFT721((uint256,string,string,address,address,string,string,uint256,address,string,string,uint256,string,uint256),bytes[])": FunctionFragment;
+    "addValidator(address,(string,bytes)[])": FunctionFragment;
+    "claimNFT1155((uint256,string,string,address,string,string,string,uint256,address,string,string,uint256,string,uint256),bytes[])": FunctionFragment;
+    "claimNFT721((uint256,string,string,address,string,string,string,uint256,address,string,string,uint256,string,uint256),bytes[])": FunctionFragment;
     "claimValidatorRewards(address,bytes[])": FunctionFragment;
     "collectionDeployer()": FunctionFragment;
-    "duplicateStorageMapping1155(address,string)": FunctionFragment;
-    "duplicateStorageMapping721(address,string)": FunctionFragment;
+    "duplicateStorageMapping1155(string,string)": FunctionFragment;
+    "duplicateStorageMapping721(string,string)": FunctionFragment;
     "duplicateToOriginalMapping(address,string)": FunctionFragment;
     "lock1155(uint256,string,string,address,uint256)": FunctionFragment;
     "lock721(uint256,string,string,address)": FunctionFragment;
-    "originalStorageMapping1155(address,string)": FunctionFragment;
-    "originalStorageMapping721(address,string)": FunctionFragment;
-    "originalToDuplicateMapping(address,string)": FunctionFragment;
+    "originalStorageMapping1155(string,string)": FunctionFragment;
+    "originalStorageMapping721(string,string)": FunctionFragment;
+    "originalToDuplicateMapping(string,string)": FunctionFragment;
     "selfChain()": FunctionFragment;
     "storageDeployer()": FunctionFragment;
     "uniqueIdentifier(bytes32)": FunctionFragment;
@@ -124,7 +134,7 @@ export interface BridgeInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "addValidator",
-    values: [string, BytesLike[]]
+    values: [string, SignerAndSignatureStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "claimNFT1155",
@@ -253,7 +263,7 @@ export interface BridgeInterface extends utils.Interface {
   events: {
     "AddNewValidator(address)": EventFragment;
     "Claimed(string,string)": EventFragment;
-    "Locked(uint256,string,string,address,uint256,string,string)": EventFragment;
+    "Locked(uint256,string,string,string,uint256,string,string)": EventFragment;
     "LogHash(bytes32,bytes[])": EventFragment;
     "RewardValidator(address)": EventFragment;
     "UnLock1155(address,uint256,address,uint256)": EventFragment;
@@ -375,7 +385,7 @@ export interface Bridge extends BaseContract {
   functions: {
     addValidator(
       _validator: string,
-      signatures: BytesLike[],
+      signatures: SignerAndSignatureStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -473,7 +483,7 @@ export interface Bridge extends BaseContract {
 
   addValidator(
     _validator: string,
-    signatures: BytesLike[],
+    signatures: SignerAndSignatureStruct[],
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -571,7 +581,7 @@ export interface Bridge extends BaseContract {
   callStatic: {
     addValidator(
       _validator: string,
-      signatures: BytesLike[],
+      signatures: SignerAndSignatureStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -677,7 +687,7 @@ export interface Bridge extends BaseContract {
     ): ClaimedEventFilter;
     Claimed(sourceChain?: null, transactionHash?: null): ClaimedEventFilter;
 
-    "Locked(uint256,string,string,address,uint256,string,string)"(
+    "Locked(uint256,string,string,string,uint256,string,string)"(
       tokenId?: null,
       destinationChain?: null,
       destinationUserAddress?: null,
@@ -733,7 +743,7 @@ export interface Bridge extends BaseContract {
   estimateGas: {
     addValidator(
       _validator: string,
-      signatures: BytesLike[],
+      signatures: SignerAndSignatureStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -827,7 +837,7 @@ export interface Bridge extends BaseContract {
   populateTransaction: {
     addValidator(
       _validator: string,
-      signatures: BytesLike[],
+      signatures: SignerAndSignatureStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
